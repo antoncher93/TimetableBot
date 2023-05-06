@@ -37,7 +37,31 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
         await _client
             .SendTextMessageAsync(
                 chatId: student.ChatId,
-                text: "Выберите курс:",
+                text: "Чтобы посмотреть рассписание выберите курс",
+                replyMarkup: new InlineKeyboardMarkup(buttons));
+    }
+
+    public async Task ShowGroupsAsync(Student student, List<Group> groups)
+    {
+        var buttons = groups
+            .Select(group =>
+            {
+                var data = new CallbackQueryEnvelope(
+                        groupTap: new GroupTapCallbackQuery())
+                    .ToString();
+
+                return new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        text: group.Name,
+                        callbackData: data),
+                };
+            });
+        
+        await _client
+            .SendTextMessageAsync(
+                chatId: student.ChatId,
+                text: "Выберите группу",
                 replyMarkup: new InlineKeyboardMarkup(buttons));
     }
 }

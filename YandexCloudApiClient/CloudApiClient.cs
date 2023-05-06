@@ -36,6 +36,27 @@ public class CloudApiClient : ICloudApiClient
         }
     }
 
+    public async Task<ApiCloudResponse<byte[]>> DownloadFileAsync(ResourceItem item)
+    {
+        using var client = new RestClient();
+
+        var request = new RestRequest(
+            resource: item.File);
+
+        var response = await client.GetAsync(request);
+
+        if (response.IsSuccessful)
+        {
+            return ApiCloudResponse<byte[]>.FromSuccess(result: response.RawBytes!);
+        }
+        else
+        {
+            return ApiCloudResponse<byte[]>.FromError(
+                statusCode: response.StatusCode,
+                message: response.Content);
+        }
+    }
+
     public void Dispose()
     {
         _restClient.Dispose();

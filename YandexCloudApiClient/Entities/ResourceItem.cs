@@ -2,8 +2,11 @@
 
 namespace YandexCloudApiClient.Entities;
 
-public class ResourseItem
+public class ResourceItem
 {
     [JsonPropertyName("name")]
     public string Name { get; set; }
+    
+    [JsonPropertyName("file")]
+    public string? File { get; set; }
 }

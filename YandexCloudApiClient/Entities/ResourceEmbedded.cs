@@ -2,8 +2,8 @@
 
 namespace YandexCloudApiClient.Entities;
 
-public class ResourseEmbedded
+public class ResourceEmbedded
 {
     [JsonPropertyName("items")]
-    public List<ResourseItem> Items { get; set; } = new List<ResourseItem>();
+    public List<ResourceItem> Items { get; set; } = new List<ResourceItem>();
 }

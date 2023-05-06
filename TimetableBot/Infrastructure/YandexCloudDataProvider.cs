@@ -1,24 +1,31 @@
-﻿using System.Text.RegularExpressions;
-using TimetableBot.Models;
+﻿using TimetableBot.Models;
 using YandexCloudApiClient;
+using YandexCloudApiClient.Entities;
 
 namespace TimetableBot.Infrastructure;
 
 public class YandexCloudDataProvider : IDataProvider
 {
+    private readonly IExcelFileReader _excelFileReader;
     private readonly string _folder;
+    
     private List<Course> _courses = new();
 
-    public YandexCloudDataProvider(string folder)
+    public YandexCloudDataProvider(
+        string folder,
+        IExcelFileReader excelFileReader)
     {
         _folder = folder;
+        _excelFileReader = excelFileReader;
     }
 
     public static YandexCloudDataProvider Create(
-        string folder)
+        string folder,
+        IExcelFileReader excelFileReader)
     {
         var provider = new YandexCloudDataProvider(
-            folder: folder);
+            folder: folder,
+            excelFileReader: excelFileReader);
 
         provider
             .ReloadAsync()
@@ -34,28 +41,27 @@ public class YandexCloudDataProvider : IDataProvider
         var response = await cloudApiClient.GetDiskPublicResourceAsync(
             resourcePublicKey: _folder);
 
-        _courses = response.Match(
-            onSuccess: result =>
-            {
-                var files = result.Embedded.Items
-                    .Where(item => Path.GetExtension(item.Name) == ".xls");
+        var resourceInfo = response.ResultOrException();
 
-                return files
-                    .Select(file =>
-                    {
-                        var fileName = Path.GetFileNameWithoutExtension(file.Name); // берем имя файла без расширения
-                        var courseName = GetShortName(fileName); // укорачиваем имя (берем все, что идет за последним `-` в строке
-                        return new Course(courseName);
-                    })
-                    .ToList();
-            },
-            onError: (statusCode, message) => new List<Course>());
+        foreach (var item in resourceInfo.Embedded.Items)
+        {
+            if (Path.GetExtension(item.Name) == ".xls") // проверям, что это файл Excel
+            {
+                var course = await this.GetCourseFromFileAsync(
+                    client: cloudApiClient,
+                    file: item);
+            }
+        }
     }
 
     public List<Course> GetCourses() => _courses.ToList();
 
-    private string GetShortName(string name)
+    private async Task<Course> GetCourseFromFileAsync(
+        ICloudApiClient client,
+        ResourceItem file)
     {
-        return Regex.Match(name, @"[^-]*$").Value;
+        var response = await client.DownloadFileAsync(file);
+        var bytes = response.ResultOrException();
+        return await _excelFileReader.ReadCourseDataFromBytesAsync(bytes);
     }
 }

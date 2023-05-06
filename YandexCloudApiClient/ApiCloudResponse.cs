@@ -51,6 +51,13 @@ public class ApiCloudResponse<TResult>
         throw new NotSupportedException();
     }
 
+    public TResult ResultOrException() => this.Match(
+        onSuccess: result => result,
+        onError: (s, message) => throw new HttpRequestException(
+            message: message,
+            inner: null,
+            statusCode: s));
+
     private class SuccessResponse
     {
         public SuccessResponse(TResult result)

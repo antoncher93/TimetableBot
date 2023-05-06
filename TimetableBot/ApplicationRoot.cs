@@ -14,7 +14,8 @@ public static class ApplicationRoot
         string yandexDiskFolder)
     {
         var dataProvider = YandexCloudDataProvider.Create(
-            folder: yandexDiskFolder);
+            folder: yandexDiskFolder,
+            excelFileReader: new ExcelFileReader());
 
         var coursesRepository = new CoursesRepository(
             dataProvider: dataProvider);
@@ -34,10 +35,19 @@ public static class ApplicationRoot
 
         var showCoursesCommandHandler = new ShowCoursesCommandHandler(
             adapter: telegramBotClientAdapter);
+
+        var groupsQueryHandler = new GroupsQueryHandler(
+            groupsRepository: new GroupsRepository(
+                dataProvider: dataProvider));
+
+        var showGroupsCommandHandler = new ShowGroupsCommandHandler(
+            adapter: telegramBotClientAdapter);
         
         return new BotFacade(
             coursesQuery: coursesQuery,
+            groupsQueryHandler: groupsQueryHandler,
             registerStudentQueryHandler: registerStudentQueryHandler,
-            showCoursesCommandHandler: showCoursesCommandHandler);
+            showCoursesCommandHandler: showCoursesCommandHandler,
+            showGroupsCommandHandler: showGroupsCommandHandler);
     }
 }
