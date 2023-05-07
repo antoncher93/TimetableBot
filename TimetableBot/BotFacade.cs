@@ -55,7 +55,8 @@ public class BotFacade : IBotFacade
 
     }
 
-    private Task OnGroupTap(GroupTapCallbackQuery groupTap)
+    private Task OnGroupTap(
+        GroupTapCallbackQuery groupTap)
     {
         return Task.CompletedTask;
     }
@@ -79,6 +80,7 @@ public class BotFacade : IBotFacade
         await _showGroupsCommandHandler
             .HandleAsync(
                 command: new ShowGroupsCommand(
+                    course: courseTap.Course,
                     groups: groups,
                     student: student));
     }

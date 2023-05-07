@@ -46,6 +46,11 @@ public class CallbackQueryEnvelope
 
     public override string ToString()
     {
-        return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        return Newtonsoft.Json.JsonConvert.SerializeObject(
+            value: this,
+            settings: new JsonSerializerSettings()
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+            });
     }
 }

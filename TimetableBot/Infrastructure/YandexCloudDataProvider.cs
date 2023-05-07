@@ -8,8 +8,7 @@ public class YandexCloudDataProvider : IDataProvider
 {
     private readonly IExcelFileReader _excelFileReader;
     private readonly string _folder;
-    
-    private List<Course> _courses = new();
+    private readonly List<Course> _courses = new();
 
     public YandexCloudDataProvider(
         string folder,
@@ -36,6 +35,8 @@ public class YandexCloudDataProvider : IDataProvider
 
     public async Task ReloadAsync()
     {
+        _courses.Clear();
+        
         using var cloudApiClient = CloudApiClientFactory.Create();
 
         var response = await cloudApiClient.GetDiskPublicResourceAsync(
@@ -50,6 +51,8 @@ public class YandexCloudDataProvider : IDataProvider
                 var course = await this.GetCourseFromFileAsync(
                     client: cloudApiClient,
                     file: item);
+                
+                _courses.Add(course);
             }
         }
     }
@@ -62,6 +65,6 @@ public class YandexCloudDataProvider : IDataProvider
     {
         var response = await client.DownloadFileAsync(file);
         var bytes = response.ResultOrException();
-        return await _excelFileReader.ReadCourseDataFromBytesAsync(bytes);
+        return await _excelFileReader.ReadCourseDataFromBytesAsync(file.Name, bytes);
     }
 }

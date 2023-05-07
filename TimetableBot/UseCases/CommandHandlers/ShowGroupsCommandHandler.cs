@@ -16,7 +16,8 @@ public class ShowGroupsCommandHandler : ShowGroupsCommand.IHandler
         ShowGroupsCommand command)
     {
         return _adapter.ShowGroupsAsync(
-            groups: command.Groups,
-            student: command.Student);
+            student: command.Student,
+            groups: command.Groups, 
+            course: command.Course);
     }
 }

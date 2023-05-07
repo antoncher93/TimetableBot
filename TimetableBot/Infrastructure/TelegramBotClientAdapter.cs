@@ -41,13 +41,18 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
                 replyMarkup: new InlineKeyboardMarkup(buttons));
     }
 
-    public async Task ShowGroupsAsync(Student student, List<Group> groups)
+    public async Task ShowGroupsAsync(
+        Student student,
+        List<Group> groups,
+        string course)
     {
         var buttons = groups
             .Select(group =>
             {
                 var data = new CallbackQueryEnvelope(
-                        groupTap: new GroupTapCallbackQuery())
+                        groupTap: new GroupTapCallbackQuery(
+                            group: group.Name, 
+                            course: course))
                     .ToString();
 
                 return new[]

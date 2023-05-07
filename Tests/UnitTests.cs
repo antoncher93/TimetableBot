@@ -19,12 +19,19 @@ public class UnitTests
     }
     
     
-    [Fact]
-    public async Task Test2()
+    [Theory]
+    [InlineData("расписание на весенний семестр_2022-2023_очно-заочная форма обучения.xls")]
+    [InlineData("расписание на весенний семестр_2022-2023-1 курс.xls")]
+    [InlineData("расписание на весенний семестр_2022-2023-2 курс.xls")]
+    [InlineData("расписание на весенний семестр_2022-2023-3 курс.xls")]
+    [InlineData("расписание на весенний семестр_2022-2023-4 курс.xls")]
+    [InlineData("расписание на весенний семестр_2022-2023-5 курс, магистратура.xls")]
+    public async Task Test2(
+        string fileName)
     {
         var excelFileReader = new ExcelFileReader();
-        var bytes = await this.ReadLocalFileAsync();
-        var course = await excelFileReader.ReadCourseDataFromBytesAsync(bytes);
+        var bytes = await this.ReadLocalFileAsync($"C:/Test/{fileName}");
+        var course = await excelFileReader.ReadCourseDataFromBytesAsync(fileName, bytes);
         Assert.NotNull(course);
     }
 
@@ -50,8 +57,8 @@ public class UnitTests
     }
 
 
-    private async Task<byte[]> ReadLocalFileAsync()
+    private async Task<byte[]> ReadLocalFileAsync(string fullFileNane)
     {
-        return await File.ReadAllBytesAsync(@"C:/test.xls");
+        return await File.ReadAllBytesAsync(fullFileNane);
     }
 }

@@ -2,7 +2,11 @@
 
 public class Lesson
 {
-    public Lesson(DateTime startsAt, DateTime endsAt, string title, string description)
+    public Lesson(
+        TimeSpan startsAt,
+        TimeSpan endsAt,
+        string title,
+        string description)
     {
         StartsAt = startsAt;
         EndsAt = endsAt;
@@ -10,9 +14,9 @@ public class Lesson
         Description = description;
     }
     
-    public DateTime StartsAt { get; }
+    public TimeSpan StartsAt { get; }
     
-    public DateTime EndsAt { get; }
+    public TimeSpan EndsAt { get; }
     
     public string Title { get; }
     

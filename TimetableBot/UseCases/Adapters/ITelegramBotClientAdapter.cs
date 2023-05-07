@@ -8,7 +8,6 @@ public interface ITelegramBotClientAdapter
         Student student,
         List<string> courses);
 
-    Task ShowGroupsAsync(
-        Student student,
-        List<Group> groups);
+    Task ShowGroupsAsync(Student student,
+        List<Group> groups, string course);
 }

@@ -4,5 +4,5 @@ namespace TimetableBot.Infrastructure;
 
 public interface IExcelFileReader
 {
-    Task<Course> ReadCourseDataFromBytesAsync(byte[] bytes);
+    Task<Course> ReadCourseDataFromBytesAsync(string fileName, byte[] bytes);
 }
