@@ -12,9 +12,9 @@ public class Program
         Console.CancelKeyPress += (sender, eventArgs) => cts.Cancel();
 
         BotHost.StartAsync(
-                port: 3210,
+                port: 10000,
                 telegramBotToken: "5692929074:AAEiBfoSy4CndyOU5kx3XZNpNQ3sPlbyAPc",
-                webhookHost: "https://cfad-94-243-173-210.ngrok-free.app",
+                webhookHost: "https://6a71-94-243-175-101.ngrok-free.app",
                 botFacadeFactory: client =>
                 {
                     return ApplicationRoot.CreateBotFacade(

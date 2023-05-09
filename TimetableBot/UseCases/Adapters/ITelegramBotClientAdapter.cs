@@ -1,4 +1,5 @@
-﻿using TimetableBot.Models;
+﻿using TimetableBot.CallbackQueries;
+using TimetableBot.Models;
 
 namespace TimetableBot.UseCases.Adapters;
 
@@ -8,6 +9,20 @@ public interface ITelegramBotClientAdapter
         Student student,
         List<string> courses);
 
-    Task ShowGroupsAsync(Student student,
-        List<Group> groups, string course);
+    Task ShowGroupsAsync(
+        Student student,
+        List<Group> groups,
+        int course);
+
+    Task ShowWeeksAsync(
+        Student student,
+        int course,
+        int group);
+
+    Task ShowDaysAsync(
+        Student student,
+        int course,
+        int group,
+        Week week,
+        List<string> days);
 }

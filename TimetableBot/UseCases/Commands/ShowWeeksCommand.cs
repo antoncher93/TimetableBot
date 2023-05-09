@@ -2,26 +2,21 @@
 
 namespace TimetableBot.UseCases.Commands;
 
-public class ShowGroupsCommand
+public class ShowWeeksCommand
 {
-    public ShowGroupsCommand(
-        List<Group> groups,
-        Student student,
-        int course)
+    public ShowWeeksCommand(Student student, int course, int group)
     {
-        Groups = groups;
         Student = student;
         Course = course;
+        Group = group;
     }
     
     public interface IHandler
     {
         Task HandleAsync(
-            ShowGroupsCommand command);
+            ShowWeeksCommand command);
     }
-    public List<Group> Groups { get; }
-    
     public Student Student { get; }
-    
     public int Course { get; }
+    public int Group { get; }
 }

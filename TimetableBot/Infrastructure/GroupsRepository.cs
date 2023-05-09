@@ -12,18 +12,10 @@ public class GroupsRepository : IGroupsRepository
         _dataProvider = dataProvider;
     }
 
-    public Task<List<Group>> GetGroupsAsync(string course)
+    public Task<List<Group>> GetGroupsAsync(int course)
     {
-        var groups = new List<Group>();
-        
-        var courseObj = _dataProvider.GetCourses()
-            .FirstOrDefault(c => c.Name == course);
+        var courseObj = _dataProvider.GetCourses()[course];
 
-        if (courseObj != null)
-        {
-            groups = courseObj.Groups.ToList();
-        }
-
-        return Task.FromResult(groups);
+        return Task.FromResult(courseObj.Groups.ToList());
     }
 }

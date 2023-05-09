@@ -42,12 +42,23 @@ public static class ApplicationRoot
 
         var showGroupsCommandHandler = new ShowGroupsCommandHandler(
             adapter: telegramBotClientAdapter);
+
+        var showWeeksCommandHandler = new ShowWeeksCommandHandler(
+            adapter: telegramBotClientAdapter);
+
+        var studyDaysRepository = new StudyDaysRepository(dataProvider);
+
+        var showDaysCommandHandler = new ShowDaysCommandHandler(
+            adapter: telegramBotClientAdapter,
+            studyDaysRepository: studyDaysRepository);
         
         return new BotFacade(
             coursesQuery: coursesQuery,
             groupsQueryHandler: groupsQueryHandler,
             registerStudentQueryHandler: registerStudentQueryHandler,
             showCoursesCommandHandler: showCoursesCommandHandler,
-            showGroupsCommandHandler: showGroupsCommandHandler);
+            showGroupsCommandHandler: showGroupsCommandHandler,
+            showWeeksCommandHandler: showWeeksCommandHandler,
+            showDaysCommandHandler: showDaysCommandHandler);
     }
 }

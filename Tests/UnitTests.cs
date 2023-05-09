@@ -1,3 +1,6 @@
+using System.Security.Cryptography;
+using System.Text;
+using TimetableBot.CallbackQueries;
 using TimetableBot.Infrastructure;
 using YandexCloudApiClient;
 
@@ -35,6 +38,32 @@ public class UnitTests
         Assert.NotNull(course);
     }
 
+    [Fact]
+    public void Test3()
+    {
+        var data = "otrin4oiper55bpm3ptbbnreonbpormbponwrbpwrmrpbmrwponbpowtb[prrwmbioprtnbp";
+
+        var json = data.ToString();
+
+        var hash = Hash(json);
+
+        var result = FromHash(hash);
+        
+        Assert.Equal(json, result);
+    }
+
+    private string Hash(string input)
+    {
+        var bytes = Encoding.UTF8.GetBytes(input);
+        return Convert.ToBase64String(bytes);
+    }
+
+    private string FromHash(string hash)
+    {
+        var bytes = Convert.FromBase64String(hash);
+        return Encoding.UTF8.GetString(bytes);
+    }
+
     private async Task<byte[]> DownloadFileAsync()
     {
         var folderLink = "https://disk.yandex.ru/d/48bm4CYQw5OTBw";
@@ -55,7 +84,6 @@ public class UnitTests
 
         return downloadFileResponse.ResultOrException();
     }
-
 
     private async Task<byte[]> ReadLocalFileAsync(string fullFileNane)
     {

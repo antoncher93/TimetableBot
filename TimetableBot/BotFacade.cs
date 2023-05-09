@@ -3,7 +3,9 @@ using Telegram.Bot.Hosting;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TimetableBot.CallbackQueries;
+using TimetableBot.Models;
 using TimetableBot.UseCases;
+using TimetableBot.UseCases.CommandHandlers;
 using TimetableBot.UseCases.Commands;
 using TimetableBot.UseCases.Queries;
 
@@ -16,18 +18,25 @@ public class BotFacade : IBotFacade
     private readonly GroupsQuery.IHandler _groupsQueryHandler;
     private readonly ShowCoursesCommand.IHandler _showCoursesCommandHandler;
     private readonly ShowGroupsCommand.IHandler _showGroupsCommandHandler;
+    private readonly ShowWeeksCommand.IHandler _showWeeksCommandHandler;
+    private readonly ShowDaysCommandHandler _showDaysCommandHandler;
 
     public BotFacade(
         ICoursesQuery coursesQuery,
         RegisterStudentQuery.IHandler registerStudentQueryHandler,
         ShowCoursesCommand.IHandler showCoursesCommandHandler,
-        GroupsQuery.IHandler groupsQueryHandler, ShowGroupsCommand.IHandler showGroupsCommandHandler)
+        GroupsQuery.IHandler groupsQueryHandler,
+        ShowGroupsCommand.IHandler showGroupsCommandHandler,
+        ShowWeeksCommand.IHandler showWeeksCommandHandler,
+        ShowDaysCommandHandler showDaysCommandHandler)
     {
         _coursesQuery = coursesQuery;
         _registerStudentQueryHandler = registerStudentQueryHandler;
         _showCoursesCommandHandler = showCoursesCommandHandler;
         _groupsQueryHandler = groupsQueryHandler;
         _showGroupsCommandHandler = showGroupsCommandHandler;
+        _showWeeksCommandHandler = showWeeksCommandHandler;
+        _showDaysCommandHandler = showDaysCommandHandler;
     }
 
     public Task OnUpdateAsync(Update update)
@@ -42,40 +51,69 @@ public class BotFacade : IBotFacade
         };
     }
 
-    private Task HandleCallbackQueryAsync(CallbackQuery callbackQuery)
+    private async Task HandleCallbackQueryAsync(CallbackQuery callbackQuery)
     {
-        var callbackQueryEnvelope = JsonConvert.DeserializeObject<CallbackQueryEnvelope>(callbackQuery.Data!);
+        var callbackDataEnvelope = JsonConvert.DeserializeObject<CallbackDataEnvelope>(callbackQuery.Data);
 
-        return callbackQueryEnvelope.Match(
+        var userId = callbackQuery.From.Id;
+        var chatId = callbackQuery.Message!.Chat.Id;
+
+        var student = await this.RegisterStudentAsync(
+            userId: userId,
+            chatId: chatId);
+        
+        await callbackDataEnvelope.Match(
             onCourseTap: courseTap => this.OnCourseTapCallback(
                 courseTap: courseTap,
-                userId: callbackQuery.From.Id,
-                chatId: callbackQuery.Message!.Chat.Id),
-            onGroupTap: groupTap => this.OnGroupTap(groupTap));
+                student: student),
+            onGroupTap: groupTap => this.OnGroupTapAsync(
+                 groupTap: groupTap,
+                 student: student),
+            onWeekTap: weekTap => this.OnWeekTapAsync(
+                student: student,
+                weekTap: weekTap),
+            onDayTap: dayTap => this.OnDayTap());
 
     }
 
-    private Task OnGroupTap(
-        GroupTapCallbackQuery groupTap)
+    private Task OnDayTap()
     {
         return Task.CompletedTask;
     }
 
+    private Task OnWeekTapAsync(
+        Student student,
+        WeekTapCallbackData weekTap)
+    {
+        return _showDaysCommandHandler
+            .HandleAsync(
+                command: new ShowDaysCommand(
+                    student: student,
+                    course: weekTap.Course,
+                    group: weekTap.Group,
+                    week: weekTap.Week));
+    }
+
+    private Task OnGroupTapAsync(
+        Student student,
+        GroupTapCallbackData groupTap)
+    {
+        return _showWeeksCommandHandler
+            .HandleAsync(
+                command: new ShowWeeksCommand(
+                    student: student,
+                    course: groupTap.Course,
+                    groupTap.Group));
+    }
+
     private async Task OnCourseTapCallback(
-        CourseTapCallbackQuery courseTap,
-        long userId,
-        long chatId)
+        Student student,
+        CourseTapCallbackData courseTap)
     {
         var groups = await _groupsQueryHandler
             .HandleAsync(
                 query: new GroupsQuery(
                     course: courseTap.Course));
-
-        var student = await _registerStudentQueryHandler
-            .HandleAsync(
-                query: new RegisterStudentQuery(
-                    userId: userId,
-                    chatId: chatId));
 
         await _showGroupsCommandHandler
             .HandleAsync(
@@ -114,5 +152,16 @@ public class BotFacade : IBotFacade
                 command: new ShowCoursesCommand(
                     student: student,
                     courses: courses));
+    }
+
+    private Task<Student> RegisterStudentAsync(
+        long userId,
+        long chatId)
+    {
+        return _registerStudentQueryHandler
+            .HandleAsync(
+                query: new RegisterStudentQuery(
+                    userId: userId,
+                    chatId: chatId));
     }
 }

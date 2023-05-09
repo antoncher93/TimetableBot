@@ -19,11 +19,12 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
         Student student,
         List<string> courses)
     {
+        
         var buttons = courses
-            .Select(course =>
+            .Select((course, i) =>
             {
-                var callbackData = new CallbackQueryEnvelope(
-                        courseTap: new CourseTapCallbackQuery(course: course))
+                var callbackData = new CallbackDataEnvelope(
+                        courseTap: new CourseTapCallbackData(course: i))
                     .ToString();
 
                 return new[]
@@ -41,17 +42,16 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
                 replyMarkup: new InlineKeyboardMarkup(buttons));
     }
 
-    public async Task ShowGroupsAsync(
-        Student student,
+    public async Task ShowGroupsAsync(Student student,
         List<Group> groups,
-        string course)
+        int course)
     {
         var buttons = groups
-            .Select(group =>
+            .Select((group, i) =>
             {
-                var data = new CallbackQueryEnvelope(
-                        groupTap: new GroupTapCallbackQuery(
-                            group: group.Name, 
+                var data = new CallbackDataEnvelope(
+                        groupTap: new GroupTapCallbackData(
+                            group: i, 
                             course: course))
                     .ToString();
 
@@ -68,5 +68,70 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
                 chatId: student.ChatId,
                 text: "Выберите группу",
                 replyMarkup: new InlineKeyboardMarkup(buttons));
+    }
+
+    public async Task ShowWeeksAsync(Student student, int course, int group)
+    {
+        var buttons = new InlineKeyboardButton[]
+        {
+            InlineKeyboardButton.WithCallbackData(
+                text: "1",
+                callbackData: new CallbackDataEnvelope(
+                        weekTap: new WeekTapCallbackData(
+                            course: course,
+                            group: group,
+                            week: Week.First))
+                    .ToString()),
+            InlineKeyboardButton.WithCallbackData(
+                text: "2",
+                callbackData: new CallbackDataEnvelope(
+                        weekTap: new WeekTapCallbackData(
+                            course: course,
+                            group: group,
+                            week: Week.Second))
+                    .ToString())
+        };
+        
+        await _client
+            .SendTextMessageAsync(
+                chatId: student.ChatId,
+                text: "Выберите неделю",
+                replyMarkup: new InlineKeyboardMarkup(buttons));
+    }
+
+    public async Task ShowDaysAsync(Student student,
+        int course,
+        int group,
+        Week week,
+        List<string> days)
+    {
+        var buttons = days
+            .Select((day, i) =>
+            {
+                var data = new CallbackDataEnvelope(
+                        dayTap: new DayTapCallbackData(
+                            course: course,
+                            group: group,
+                            week: week,
+                            dayOfWeek: i))
+                    .ToString();
+
+                return new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(
+                        text: day,
+                        callbackData: data),
+                };
+            });
+
+        var maxLength = buttons
+            .SelectMany(b => b)
+            .Select(b => b.CallbackData.Length)
+            .Max();
+
+        await _client.SendTextMessageAsync(
+            chatId: student.ChatId,
+            text: "Выберите день",
+            replyMarkup: new InlineKeyboardMarkup(buttons));
     }
 }

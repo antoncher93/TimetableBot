@@ -2,20 +2,20 @@
 
 namespace TimetableBot.CallbackQueries;
 
-public class GroupTapCallbackQuery
+public class GroupTapCallbackData
 {
-    public GroupTapCallbackQuery()
+    public GroupTapCallbackData()
     {
     }
-    public GroupTapCallbackQuery(string group, string course)
+    public GroupTapCallbackData(int group, int course)
     {
         Group = group;
         Course = course;
     }
     
     [JsonProperty(PropertyName = "c")]
-    public string Course { get; set; }
+    public int Course { get; set; }
     
     [JsonProperty(PropertyName = "g")]
-    public string Group { get; set; }
+    public int Group { get; set; }
 }

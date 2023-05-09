@@ -5,7 +5,7 @@ namespace TimetableBot.UseCases;
 // класс для запроса групп на курсе
 public class GroupsQuery
 {
-    public GroupsQuery(string course)
+    public GroupsQuery(int course)
     {
         Course = course;
     }
@@ -13,5 +13,5 @@ public class GroupsQuery
      {
          Task<List<Group>> HandleAsync(GroupsQuery query);
      }
-    public string Course { get; }
+    public int Course { get; }
 }
