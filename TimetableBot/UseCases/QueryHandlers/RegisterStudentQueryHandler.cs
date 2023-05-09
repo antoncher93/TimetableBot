@@ -14,10 +14,10 @@ public class RegisterStudentQueryHandler : RegisterStudentQuery.IHandler
         _studentRepository = studentRepository;
     }
 
-    public async Task<Student> HandleAsync(
+    public Task<Student> HandleAsync(
         RegisterStudentQuery query)
     {
-        var student = await _studentRepository.FindStudentAsync(
+        var student = _studentRepository.FindStudent(
             userId: query.UserId,
             chatId: query.ChatId);
 
@@ -27,9 +27,9 @@ public class RegisterStudentQueryHandler : RegisterStudentQuery.IHandler
                 userId: query.UserId,
                 chatId: query.ChatId);
 
-            await _studentRepository.AddStudentAsync(student);
+            _studentRepository.AddStudent(student);
         }
 
-        return student;
+        return Task.FromResult(student);
     }
 }

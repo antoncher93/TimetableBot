@@ -1,4 +1,6 @@
-﻿using Telegram.Bot;
+﻿using System.Text;
+using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using TimetableBot.CallbackQueries;
 using TimetableBot.Models;
@@ -133,5 +135,33 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
             chatId: student.ChatId,
             text: "Выберите день",
             replyMarkup: new InlineKeyboardMarkup(buttons));
+    }
+
+    public async Task ShowTimetableAsync(long chatId, List<StudyDay> days)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var day in days)
+        {
+            sb.AppendLine($"🎓 `{day.DayOfWeek}`");
+            if (day.SpecialDescription != null)
+            {
+                sb.AppendLine(day.SpecialDescription);
+            }
+            else
+            {
+                foreach (var lesson in day.Lessons)
+                {
+                    sb.AppendLine($"🕑{lesson.StartsAt.ToString("hh\\:mm")} - {lesson.EndsAt.ToString("hh\\:mm")}");
+                    sb.AppendLine(lesson.Title);
+                    sb.AppendLine(lesson.Description);
+                }
+            }
+        }
+
+        await _client.SendTextMessageAsync(
+            chatId: chatId,
+            text: sb.ToString(),
+            ParseMode.Markdown);
     }
 }

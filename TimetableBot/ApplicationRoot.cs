@@ -10,7 +10,6 @@ public static class ApplicationRoot
 {
     public static IBotFacade CreateBotFacade(
         ITelegramBotClient client,
-        string sqlConnectionString,
         string yandexDiskFolder)
     {
         var dataProvider = YandexCloudDataProvider.Create(
@@ -20,10 +19,8 @@ public static class ApplicationRoot
         var coursesRepository = new CoursesRepository(
             dataProvider: dataProvider);
 
-        var dbConnectionFactory = new SqlConnectionFactory(sqlConnectionString);
 
-        var studentRepository = new StudentRepository(
-            dbConnectionFactory: dbConnectionFactory);
+        var studentRepository = new StudentRepository();
 
         var coursesQuery = new CoursesQueryHandler(
             coursesRepository: coursesRepository);
@@ -51,6 +48,10 @@ public static class ApplicationRoot
         var showDaysCommandHandler = new ShowDaysCommandHandler(
             adapter: telegramBotClientAdapter,
             studyDaysRepository: studyDaysRepository);
+
+        var showTimetableCommandHandler = new ShowTimetableCommandHandler(
+            adapter: telegramBotClientAdapter,
+            studyDaysRepository: studyDaysRepository);
         
         return new BotFacade(
             coursesQuery: coursesQuery,
@@ -59,6 +60,7 @@ public static class ApplicationRoot
             showCoursesCommandHandler: showCoursesCommandHandler,
             showGroupsCommandHandler: showGroupsCommandHandler,
             showWeeksCommandHandler: showWeeksCommandHandler,
-            showDaysCommandHandler: showDaysCommandHandler);
+            showDaysCommandHandler: showDaysCommandHandler,
+            showTimetableCommandHandler: showTimetableCommandHandler);
     }
 }

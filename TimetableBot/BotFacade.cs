@@ -19,6 +19,7 @@ public class BotFacade : IBotFacade
     private readonly ShowCoursesCommand.IHandler _showCoursesCommandHandler;
     private readonly ShowGroupsCommand.IHandler _showGroupsCommandHandler;
     private readonly ShowWeeksCommand.IHandler _showWeeksCommandHandler;
+    private readonly ShowTimetableCommand.IHandler _showTimetableCommandHandler;
     private readonly ShowDaysCommandHandler _showDaysCommandHandler;
 
     public BotFacade(
@@ -28,7 +29,8 @@ public class BotFacade : IBotFacade
         GroupsQuery.IHandler groupsQueryHandler,
         ShowGroupsCommand.IHandler showGroupsCommandHandler,
         ShowWeeksCommand.IHandler showWeeksCommandHandler,
-        ShowDaysCommandHandler showDaysCommandHandler)
+        ShowDaysCommandHandler showDaysCommandHandler, 
+        ShowTimetableCommand.IHandler showTimetableCommandHandler)
     {
         _coursesQuery = coursesQuery;
         _registerStudentQueryHandler = registerStudentQueryHandler;
@@ -37,6 +39,7 @@ public class BotFacade : IBotFacade
         _showGroupsCommandHandler = showGroupsCommandHandler;
         _showWeeksCommandHandler = showWeeksCommandHandler;
         _showDaysCommandHandler = showDaysCommandHandler;
+        _showTimetableCommandHandler = showTimetableCommandHandler;
     }
 
     public Task OnUpdateAsync(Update update)
@@ -85,10 +88,10 @@ public class BotFacade : IBotFacade
         Student student,
         WeekTapCallbackData weekTap)
     {
-        return _showDaysCommandHandler
+        return _showTimetableCommandHandler
             .HandleAsync(
-                command: new ShowDaysCommand(
-                    student: student,
+                command: new ShowTimetableCommand(
+                    chatId: student.ChatId,
                     course: weekTap.Course,
                     group: weekTap.Group,
                     week: weekTap.Week));

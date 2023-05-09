@@ -19,7 +19,6 @@ public class Program
                 {
                     return ApplicationRoot.CreateBotFacade(
                         client: client,
-                        sqlConnectionString: "Server=localhost,1433;Database=master;User Id=sa;Password=Pa23@!Ze7&;",
                         yandexDiskFolder: "https://disk.yandex.ru/d/48bm4CYQw5OTBw");
                 })
             .GetAwaiter()

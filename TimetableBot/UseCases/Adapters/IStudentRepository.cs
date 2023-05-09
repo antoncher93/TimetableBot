@@ -4,7 +4,7 @@ namespace TimetableBot.UseCases.Adapters;
 
 public interface IStudentRepository
 {
-    Task<Student?> FindStudentAsync(long userId, long chatId);
+    Student? FindStudent(long userId, long chatId);
 
-    Task AddStudentAsync(Student student);
+    void AddStudent(Student student);
 }

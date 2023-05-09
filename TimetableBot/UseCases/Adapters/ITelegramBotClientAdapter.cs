@@ -25,4 +25,6 @@ public interface ITelegramBotClientAdapter
         int group,
         Week week,
         List<string> days);
+
+    Task ShowTimetableAsync(long chatId, List<StudyDay> days);
 }

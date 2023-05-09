@@ -1,34 +1,33 @@
-﻿using Dapper;
-using TimetableBot.Models;
+﻿using TimetableBot.Models;
 using TimetableBot.UseCases.Adapters;
 
 namespace TimetableBot.Infrastructure;
 
 public class StudentRepository : IStudentRepository
 {
-    private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly IDictionary<string, Student> _students = new Dictionary<string, Student>();
 
-    public StudentRepository(
-        IDbConnectionFactory dbConnectionFactory)
+    public StudentRepository()
     {
-        _dbConnectionFactory = dbConnectionFactory;
     }
 
-    public async Task<Student?> FindStudentAsync(long userId, long chatId)
+    public Student? FindStudent(long userId, long chatId)
     {
-        using var connection = _dbConnectionFactory.Create();
-        var data = await connection.QueryFirstOrDefaultAsync<DataModels.StudentData>(
-            sql: $"SELECT * FROM Students WHERE UserId={userId} AND ChatId={chatId}");
-
-        return data != null
-            ? new Student(data.UserId, data.ChatId)
-            : null;
+        var exists = _students.TryGetValue(BuildKey(userId, chatId), out var value);
+        return exists ? value : null;
     }
 
-    public async Task AddStudentAsync(Student student)
+    public async void AddStudent(Student student)
     {
-        using var connection = _dbConnectionFactory.Create();
-        await connection.ExecuteAsync(
-            sql: $"INSERT INTO Students (UserId, ChatId) VALUES ({student.UserId}, {student.ChatId})");
+        var key = BuildKey(
+            userId: student.UserId,
+            chatId: student.ChatId);
+        
+        _students[key] = student;
+    }
+
+    private string BuildKey(long userId, long chatId)
+    {
+        return $"{userId}:{chatId}";
     }
 }
