@@ -35,7 +35,7 @@ public class ExcelFileReader : IExcelFileReader
         {
             var cell = row.Cells[i];
             var week1 = ReadWeek(sheet, i);
-            var week2 = ReadWeek(sheet, i + groupCount);
+            var week2 = ReadWeek(sheet, i + groupCount + 3);
             
             var group = new Group(
                 name: cell.ToString(),

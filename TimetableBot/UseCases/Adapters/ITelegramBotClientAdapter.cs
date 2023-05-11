@@ -1,5 +1,4 @@
-﻿using TimetableBot.CallbackQueries;
-using TimetableBot.Models;
+﻿using TimetableBot.Models;
 
 namespace TimetableBot.UseCases.Adapters;
 
@@ -19,12 +18,24 @@ public interface ITelegramBotClientAdapter
         int course,
         int group);
 
-    Task ShowDaysAsync(
-        Student student,
+    Task ShowTimetableAsync(
+        long chatId,
+        List<StudyDay> days,
         int course,
-        int group,
-        Week week,
-        List<string> days);
+        int group);
+    
+    Task SendCopyOfMessageToAllAsync(
+        long fromChatId,
+        int messageId,
+        long chatId);
 
-    Task ShowTimetableAsync(long chatId, List<StudyDay> days);
+    Task SendTokenAsync(
+        long chatId,
+        string token);
+    
+    Task SendAdminJoinedAsync(
+        Student commandStudent);
+    
+    Task SendCannotJoinAsAdminAsync(
+        Student commandStudent);
 }

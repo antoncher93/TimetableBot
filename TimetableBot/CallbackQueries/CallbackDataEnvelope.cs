@@ -32,6 +32,12 @@ public class CallbackDataEnvelope
     {
         DayTap = dayTap;
     }
+
+    public CallbackDataEnvelope(
+        MainMenuCallbackData mainMenu)
+    {
+        MainMenu = mainMenu;
+    }
     
     [JsonProperty(PropertyName = "c")]
     public CourseTapCallbackData? CourseTap { get; set; }
@@ -44,13 +50,16 @@ public class CallbackDataEnvelope
     
     [JsonProperty(PropertyName = "d")]
     public DayTapCallbackData? DayTap { get; set; }
+    
+    [JsonProperty(PropertyName = "m")]
+    public MainMenuCallbackData? MainMenu { get; set; }
 
     // метод для матчинг-паттерна
     public T Match<T>(
         Func<CourseTapCallbackData, T> onCourseTap,
         Func<GroupTapCallbackData, T> onGroupTap,
         Func<WeekTapCallbackData, T> onWeekTap,
-        Func<DayTapCallbackData, T> onDayTap)
+        Func<MainMenuCallbackData, T> onMainMenu)
     {
         if (this.CourseTap != null)
         {
@@ -67,9 +76,9 @@ public class CallbackDataEnvelope
             return onWeekTap(this.WeekTap);
         }
 
-        if (this.DayTap != null)
+        if (this.MainMenu != null)
         {
-            return onDayTap(this.DayTap);
+            return onMainMenu(this.MainMenu);
         }
 
         throw new NotSupportedException();

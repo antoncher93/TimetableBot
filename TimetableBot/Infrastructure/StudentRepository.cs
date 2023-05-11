@@ -17,13 +17,20 @@ public class StudentRepository : IStudentRepository
         return exists ? value : null;
     }
 
-    public async void AddStudent(Student student)
+    public void AddStudent(Student student)
     {
         var key = BuildKey(
             userId: student.UserId,
             chatId: student.ChatId);
+
+        student.IsAdmin = _students.Count == 0;
         
         _students[key] = student;
+    }
+
+    public List<Student> GetAllStudents()
+    {
+        return _students.Values.ToList();
     }
 
     private string BuildKey(long userId, long chatId)

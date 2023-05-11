@@ -40,7 +40,7 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
         await _client
             .SendTextMessageAsync(
                 chatId: student.ChatId,
-                text: "Чтобы посмотреть рассписание выберите курс",
+                text: "Чтобы посмотреть расписание выберите курс",
                 replyMarkup: new InlineKeyboardMarkup(buttons));
     }
 
@@ -53,7 +53,7 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
             {
                 var data = new CallbackDataEnvelope(
                         groupTap: new GroupTapCallbackData(
-                            group: i, 
+                            group: i,
                             course: course))
                     .ToString();
 
@@ -63,7 +63,12 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
                         text: group.Name,
                         callbackData: data),
                 };
-            });
+            })
+            .ToList();
+
+        var mainMenuButton = CreateButtonForMainMenu();
+        
+        buttons.Add(new []{ mainMenuButton });
         
         await _client
             .SendTextMessageAsync(
@@ -74,25 +79,32 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
 
     public async Task ShowWeeksAsync(Student student, int course, int group)
     {
-        var buttons = new InlineKeyboardButton[]
+        var buttons = new List<InlineKeyboardButton[]>()
         {
-            InlineKeyboardButton.WithCallbackData(
-                text: "1",
-                callbackData: new CallbackDataEnvelope(
-                        weekTap: new WeekTapCallbackData(
-                            course: course,
-                            group: group,
-                            week: Week.First))
-                    .ToString()),
-            InlineKeyboardButton.WithCallbackData(
-                text: "2",
-                callbackData: new CallbackDataEnvelope(
-                        weekTap: new WeekTapCallbackData(
-                            course: course,
-                            group: group,
-                            week: Week.Second))
-                    .ToString())
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    text: "1",
+                    callbackData: new CallbackDataEnvelope(
+                            weekTap: new WeekTapCallbackData(
+                                course: course,
+                                group: group,
+                                week: Week.First))
+                        .ToString()),
+                InlineKeyboardButton.WithCallbackData(
+                    text: "2",
+                    callbackData: new CallbackDataEnvelope(
+                            weekTap: new WeekTapCallbackData(
+                                course: course,
+                                group: group,
+                                week: Week.Second))
+                        .ToString())
+            }
         };
+        
+        var mainMenuButton = CreateButtonForMainMenu();
+        
+        buttons.Add(new [] { mainMenuButton });
         
         await _client
             .SendTextMessageAsync(
@@ -101,45 +113,22 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
                 replyMarkup: new InlineKeyboardMarkup(buttons));
     }
 
-    public async Task ShowDaysAsync(Student student,
-        int course,
-        int group,
-        Week week,
-        List<string> days)
-    {
-        var buttons = days
-            .Select((day, i) =>
-            {
-                var data = new CallbackDataEnvelope(
-                        dayTap: new DayTapCallbackData(
-                            course: course,
-                            group: group,
-                            week: week,
-                            dayOfWeek: i))
-                    .ToString();
-
-                return new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(
-                        text: day,
-                        callbackData: data),
-                };
-            });
-
-        var maxLength = buttons
-            .SelectMany(b => b)
-            .Select(b => b.CallbackData.Length)
-            .Max();
-
-        await _client.SendTextMessageAsync(
-            chatId: student.ChatId,
-            text: "Выберите день",
-            replyMarkup: new InlineKeyboardMarkup(buttons));
-    }
-
-    public async Task ShowTimetableAsync(long chatId, List<StudyDay> days)
+    public async Task ShowTimetableAsync(long chatId, List<StudyDay> days, int course, int group)
     {
         var sb = new StringBuilder();
+
+        var button = InlineKeyboardButton.WithCallbackData(
+            text: "Назад",
+            callbackData: new CallbackDataEnvelope(
+                groupTap: new GroupTapCallbackData(
+                    course: course,
+                    group: group))
+                .ToString());
+
+        var buttons = new List<IEnumerable<InlineKeyboardButton>>()
+        {
+            new[] { button }
+        };
 
         foreach (var day in days)
         {
@@ -159,9 +148,61 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
             }
         }
 
+        var mainMenuButton = CreateButtonForMainMenu();
+
+        buttons.Add(new []{ mainMenuButton });
+
         await _client.SendTextMessageAsync(
             chatId: chatId,
             text: sb.ToString(),
-            ParseMode.Markdown);
+            parseMode: ParseMode.Markdown,
+            replyMarkup: new InlineKeyboardMarkup(buttons));
+    }
+
+    public Task SendCopyOfMessageToAllAsync(
+        long fromChatId,
+        int messageId,
+        long chatId)
+    {
+        return _client.CopyMessageAsync(
+            chatId: chatId,
+            messageId: messageId,
+            fromChatId: fromChatId);
+    }
+
+    public Task SendTokenAsync(long chatId, string token)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("Секретный код:");
+        sb.AppendLine($"`{token}`");
+        sb.AppendLine("Передавайте секретный код только тем, кому хотите предоставить права админа!");
+        return _client
+            .SendTextMessageAsync(
+                chatId: chatId,
+                text: sb.ToString(),
+                ParseMode.Markdown);
+    }
+
+    public Task SendAdminJoinedAsync(Student commandStudent)
+    {
+        return _client.SendTextMessageAsync(
+            chatId: commandStudent.ChatId,
+            text: "Теперь вы тоже админ");
+    }
+
+    public Task SendCannotJoinAsAdminAsync(Student commandStudent)
+    {
+        return _client.SendTextMessageAsync(
+            chatId: commandStudent.ChatId,
+            text: "Некорректный секретный код");
+    }
+
+    private InlineKeyboardButton CreateButtonForMainMenu()
+    {
+       return InlineKeyboardButton.WithCallbackData(
+           text: "Главное меню",
+           callbackData: new CallbackDataEnvelope(
+                   mainMenu: new MainMenuCallbackData())
+               .ToString());
     }
 }

@@ -26,6 +26,9 @@ public class ShowTimetableCommandHandler : ShowTimetableCommand.IHandler
                 week: command.Week);
         
         return _adapter.ShowTimetableAsync(
-            chatId: command.ChatId, days: days);
+            chatId: command.ChatId,
+            days: days,
+            course: command.Course,
+            group: command.Group);
     }
 }

@@ -20,7 +20,9 @@ public class BotFacade : IBotFacade
     private readonly ShowGroupsCommand.IHandler _showGroupsCommandHandler;
     private readonly ShowWeeksCommand.IHandler _showWeeksCommandHandler;
     private readonly ShowTimetableCommand.IHandler _showTimetableCommandHandler;
-    private readonly ShowDaysCommandHandler _showDaysCommandHandler;
+    private readonly SendMessageCommand.IHandler _sendMessageCommandHandler;
+    private readonly AddAdminCommand.IHandler _addAdminCommandHandler;
+    private readonly JoinCommand.IHandler _joinCommandHandler;
 
     public BotFacade(
         ICoursesQuery coursesQuery,
@@ -29,8 +31,10 @@ public class BotFacade : IBotFacade
         GroupsQuery.IHandler groupsQueryHandler,
         ShowGroupsCommand.IHandler showGroupsCommandHandler,
         ShowWeeksCommand.IHandler showWeeksCommandHandler,
-        ShowDaysCommandHandler showDaysCommandHandler, 
-        ShowTimetableCommand.IHandler showTimetableCommandHandler)
+        ShowTimetableCommand.IHandler showTimetableCommandHandler,
+        SendMessageCommand.IHandler sendMessageCommandHandler,
+        AddAdminCommand.IHandler addAdminCommandHandler,
+        JoinCommand.IHandler joinCommandHandler)
     {
         _coursesQuery = coursesQuery;
         _registerStudentQueryHandler = registerStudentQueryHandler;
@@ -38,8 +42,10 @@ public class BotFacade : IBotFacade
         _groupsQueryHandler = groupsQueryHandler;
         _showGroupsCommandHandler = showGroupsCommandHandler;
         _showWeeksCommandHandler = showWeeksCommandHandler;
-        _showDaysCommandHandler = showDaysCommandHandler;
         _showTimetableCommandHandler = showTimetableCommandHandler;
+        _sendMessageCommandHandler = sendMessageCommandHandler;
+        _addAdminCommandHandler = addAdminCommandHandler;
+        _joinCommandHandler = joinCommandHandler;
     }
 
     public Task OnUpdateAsync(Update update)
@@ -56,7 +62,7 @@ public class BotFacade : IBotFacade
 
     private async Task HandleCallbackQueryAsync(CallbackQuery callbackQuery)
     {
-        var callbackDataEnvelope = JsonConvert.DeserializeObject<CallbackDataEnvelope>(callbackQuery.Data);
+        var callbackDataEnvelope = JsonConvert.DeserializeObject<CallbackDataEnvelope>(callbackQuery.Data!)!;
 
         var userId = callbackQuery.From.Id;
         var chatId = callbackQuery.Message!.Chat.Id;
@@ -75,13 +81,18 @@ public class BotFacade : IBotFacade
             onWeekTap: weekTap => this.OnWeekTapAsync(
                 student: student,
                 weekTap: weekTap),
-            onDayTap: dayTap => this.OnDayTap());
+            onMainMenu: mainMenu => this.OnMainMenuTap(student));
 
     }
 
-    private Task OnDayTap()
+    private async Task OnMainMenuTap(Student student)
     {
-        return Task.CompletedTask;
+        var courses = await _coursesQuery.GetCoursesAsync();
+        
+        await _showCoursesCommandHandler.HandleAsync(
+            command: new ShowCoursesCommand(
+                student: student,
+                courses: courses));
     }
 
     private Task OnWeekTapAsync(
@@ -130,12 +141,96 @@ public class BotFacade : IBotFacade
     {
         if(message.Text == "/start")
         {
+            // получили команду /start
             return this.OnStartBotCommandAsync(
                 userId: message.From!.Id,
                 chatId: message.Chat.Id);
         }
+        else if (message.Text == "/send")
+        {
+            // получили команду /send
+
+            if (message.ReplyToMessage != null) // проверяем, что сообщение пришло в ответ другое сообщение
+            {
+                return this.OnSendMessageBotCommand(
+                    userId: message.From!.Id,
+                    chatId: message.Chat.Id,
+                    replyToMessageId: message.ReplyToMessage!.MessageId);
+            }
+        }
+        else if (message.Text == "/addadmin")
+        {
+            return this.OnAddAdminAsync(
+                userId: message.From!.Id,
+                chatId: message.Chat.Id);
+        }
+        else if(message.Text.StartsWith("/join "))
+        {
+            return this.OnJoinAdminAsync(
+                userId: message.From!.Id,
+                chatId: message.Chat.Id,
+                text: message.Text);
+        }
 
         return Task.CompletedTask;
+    }
+
+    private async Task OnJoinAdminAsync(
+        long userId,
+        long chatId,
+        string text)
+    {
+        var input = text.Split(' ');
+        
+        if (input.Length >= 2)
+        {
+            var student = await RegisterStudentAsync(
+                userId: userId,
+                chatId: chatId);
+
+            await _joinCommandHandler
+                .HandleAsync(
+                    command: new JoinCommand(
+                        student: student,
+                        token: input[1]));
+        }
+    }
+
+    private async Task OnAddAdminAsync(long userId, long chatId)
+    {
+        // регистрируем студента
+        var student = await RegisterStudentAsync(userId, chatId);
+
+        if (!student.IsAdmin) // проверяем, что студент админ
+        {
+            return;
+        }
+
+        await _addAdminCommandHandler
+            .HandleAsync(
+                command: new AddAdminCommand(
+                    chatId: chatId));
+    }
+
+    private async Task OnSendMessageBotCommand(
+        long userId,
+        long chatId,
+        int replyToMessageId)
+    {
+        // регистрируем студента
+        var student = await RegisterStudentAsync(userId, chatId);
+
+        if (!student.IsAdmin) // проверяем, что студент админ
+        {
+            return;
+        }
+        
+        // вызываем команду отвправки сообщения всем
+        await _sendMessageCommandHandler
+            .HandleAsync(
+                command: new SendMessageCommand(
+                    messageId: replyToMessageId,
+                    fromChatId: chatId));
     }
 
     private async Task OnStartBotCommandAsync(

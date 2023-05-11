@@ -45,13 +45,23 @@ public static class ApplicationRoot
 
         var studyDaysRepository = new StudyDaysRepository(dataProvider);
 
-        var showDaysCommandHandler = new ShowDaysCommandHandler(
-            adapter: telegramBotClientAdapter,
-            studyDaysRepository: studyDaysRepository);
-
         var showTimetableCommandHandler = new ShowTimetableCommandHandler(
             adapter: telegramBotClientAdapter,
             studyDaysRepository: studyDaysRepository);
+
+        var sendMessageCommandHandler = new SendMessageCommandHandler(
+            adapter: telegramBotClientAdapter,
+            studentRepository: studentRepository);
+
+        var tokensRepository = new TokensRepository();
+
+        var addAdminCommandHandler = new AddAdminCommandHandler(
+            adapter: telegramBotClientAdapter,
+            tokensRepository: tokensRepository);
+
+        var joinCommandHandler = new JoinCommandHandler(
+            adapter: telegramBotClientAdapter,
+            tokensRepository: tokensRepository);
         
         return new BotFacade(
             coursesQuery: coursesQuery,
@@ -60,7 +70,9 @@ public static class ApplicationRoot
             showCoursesCommandHandler: showCoursesCommandHandler,
             showGroupsCommandHandler: showGroupsCommandHandler,
             showWeeksCommandHandler: showWeeksCommandHandler,
-            showDaysCommandHandler: showDaysCommandHandler,
-            showTimetableCommandHandler: showTimetableCommandHandler);
+            showTimetableCommandHandler: showTimetableCommandHandler,
+            sendMessageCommandHandler: sendMessageCommandHandler,
+            addAdminCommandHandler: addAdminCommandHandler,
+            joinCommandHandler: joinCommandHandler);
     }
 }
