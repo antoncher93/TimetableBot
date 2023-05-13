@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using TimetableBot.Models;
 
 namespace TimetableBot.CallbackQueries;
 

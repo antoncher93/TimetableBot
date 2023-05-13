@@ -62,6 +62,9 @@ public static class ApplicationRoot
         var joinCommandHandler = new JoinCommandHandler(
             adapter: telegramBotClientAdapter,
             tokensRepository: tokensRepository);
+
+        var showTimetableTypesCommandHandler = new ShowTimetableTypesCommandHandler(
+            adapter: telegramBotClientAdapter);
         
         return new BotFacade(
             coursesQuery: coursesQuery,
@@ -73,6 +76,7 @@ public static class ApplicationRoot
             showTimetableCommandHandler: showTimetableCommandHandler,
             sendMessageCommandHandler: sendMessageCommandHandler,
             addAdminCommandHandler: addAdminCommandHandler,
-            joinCommandHandler: joinCommandHandler);
+            joinCommandHandler: joinCommandHandler,
+            showTimetableTypesCommandHandler: showTimetableTypesCommandHandler);
     }
 }

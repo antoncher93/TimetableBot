@@ -1,4 +1,4 @@
-﻿namespace TimetableBot.CallbackQueries;
+﻿namespace TimetableBot.Models;
 
 public enum Week
 {

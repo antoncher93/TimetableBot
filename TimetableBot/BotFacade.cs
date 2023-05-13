@@ -23,6 +23,7 @@ public class BotFacade : IBotFacade
     private readonly SendMessageCommand.IHandler _sendMessageCommandHandler;
     private readonly AddAdminCommand.IHandler _addAdminCommandHandler;
     private readonly JoinCommand.IHandler _joinCommandHandler;
+    private readonly ShowTimetableTypesCommand.IHandler _showTimetableTypesCommandHandler;
 
     public BotFacade(
         ICoursesQuery coursesQuery,
@@ -34,7 +35,8 @@ public class BotFacade : IBotFacade
         ShowTimetableCommand.IHandler showTimetableCommandHandler,
         SendMessageCommand.IHandler sendMessageCommandHandler,
         AddAdminCommand.IHandler addAdminCommandHandler,
-        JoinCommand.IHandler joinCommandHandler)
+        JoinCommand.IHandler joinCommandHandler,
+        ShowTimetableTypesCommand.IHandler showTimetableTypesCommandHandler)
     {
         _coursesQuery = coursesQuery;
         _registerStudentQueryHandler = registerStudentQueryHandler;
@@ -46,6 +48,7 @@ public class BotFacade : IBotFacade
         _sendMessageCommandHandler = sendMessageCommandHandler;
         _addAdminCommandHandler = addAdminCommandHandler;
         _joinCommandHandler = joinCommandHandler;
+        _showTimetableTypesCommandHandler = showTimetableTypesCommandHandler;
     }
 
     public Task OnUpdateAsync(Update update)
@@ -81,8 +84,41 @@ public class BotFacade : IBotFacade
             onWeekTap: weekTap => this.OnWeekTapAsync(
                 student: student,
                 weekTap: weekTap),
-            onMainMenu: mainMenu => this.OnMainMenuTap(student));
+            onMainMenu: mainMenu => this.OnMainMenuTap(student),
+            onTimetableTypeTap: timetableTap => this.OnTimetableTypeTapAsync(
+                student: student,
+                timetableTypeTap: timetableTap));
 
+    }
+
+    private Task OnTimetableTypeTapAsync(
+        Student student,
+        TimetableTypeTap timetableTypeTap)
+    {
+        return timetableTypeTap.Type switch
+        {
+            TimetableType.Week => _showWeeksCommandHandler
+                .HandleAsync(
+                    command: new ShowWeeksCommand(
+                        student: student,
+                        course: timetableTypeTap.Course,
+                        group: timetableTypeTap.Group)),
+            TimetableType.Tomorrow => _showTimetableCommandHandler
+                .HandleAsync(
+                    command: new ShowTimetableCommand(
+                        chatId: student.ChatId,
+                        course: timetableTypeTap.Course,
+                        group: timetableTypeTap.Group,
+                        type: TimetableType.Tomorrow)),
+            TimetableType.Today => _showTimetableCommandHandler
+                .HandleAsync(
+                    command: new ShowTimetableCommand(
+                        chatId: student.ChatId,
+                        course: timetableTypeTap.Course,
+                        group: timetableTypeTap.Group,
+                        type: TimetableType.Today)),
+            _ => Task.CompletedTask,
+        };
     }
 
     private async Task OnMainMenuTap(Student student)
@@ -105,6 +141,7 @@ public class BotFacade : IBotFacade
                     chatId: student.ChatId,
                     course: weekTap.Course,
                     group: weekTap.Group,
+                    type: TimetableType.Week,
                     week: weekTap.Week));
     }
 
@@ -112,12 +149,12 @@ public class BotFacade : IBotFacade
         Student student,
         GroupTapCallbackData groupTap)
     {
-        return _showWeeksCommandHandler
+        return _showTimetableTypesCommandHandler
             .HandleAsync(
-                command: new ShowWeeksCommand(
-                    student: student,
+                command: new ShowTimetableTypesCommand(
+                    chatId: student.ChatId,
                     course: groupTap.Course,
-                    groupTap.Group));
+                    group: groupTap.Group));
     }
 
     private async Task OnCourseTapCallback(

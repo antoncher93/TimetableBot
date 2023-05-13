@@ -3,25 +3,25 @@ using TimetableBot.Models;
 
 namespace TimetableBot.CallbackQueries;
 
-public class WeekTapCallbackData
+public class TimetableTypeTap
 {
-    public WeekTapCallbackData()
+    public TimetableTypeTap()
     {
     }
 
-    public WeekTapCallbackData(int course, int group, Week week)
+    public TimetableTypeTap(int course, int group, TimetableType type)
     {
         Course = course;
         Group = group;
-        Week = week;
+        Type = type;
     }
-
+    
     [JsonProperty(PropertyName = "c")]
     public int Course { get; set; }
     
     [JsonProperty(PropertyName = "g")]
     public int Group { get; set; }
     
-    [JsonProperty(PropertyName = "w")]
-    public Week Week { get; set; }
+    [JsonProperty(PropertyName = "t")]
+    public TimetableType Type { get; set; }
 }

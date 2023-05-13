@@ -38,4 +38,17 @@ public interface ITelegramBotClientAdapter
     
     Task SendCannotJoinAsAdminAsync(
         Student commandStudent);
+
+    Task ShowTimetableTypesAsync(
+        long chatId,
+        int course,
+        int group);
+
+    Task ShowNoTimetableForDayAsync(
+        long chatId,
+        DateTime date);
+
+    Task ShowDayTimetableAsync(long chatId,
+        DateTime date,
+        StudyDay studyDay);
 }

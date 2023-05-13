@@ -197,6 +197,96 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
             text: "Некорректный секретный код");
     }
 
+    public async Task ShowTimetableTypesAsync(long chatId, int course, int group)
+    {
+        var buttons = new[]
+        {
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    text: "На сегодня",
+                    callbackData: new CallbackDataEnvelope(
+                            timetableTypeTap: new TimetableTypeTap(
+                                course: course,
+                                group: group,
+                                type: TimetableType.Today))
+                        .ToString()),
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    text: "На завтра",
+                    callbackData: new CallbackDataEnvelope(
+                            timetableTypeTap: new TimetableTypeTap(
+                                course: course,
+                                group: group,
+                                type: TimetableType.Tomorrow))
+                        .ToString()),
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(
+                    text: "На неделю",
+                    callbackData: new CallbackDataEnvelope(
+                            timetableTypeTap: new TimetableTypeTap(
+                                course: course,
+                                group: group,
+                                type: TimetableType.Week))
+                        .ToString()),
+            },
+        };
+
+        await _client.SendTextMessageAsync(
+            chatId: chatId,
+            text: "Выберите расписание",
+            replyMarkup: new InlineKeyboardMarkup(buttons));
+    }
+
+    public async Task ShowNoTimetableForDayAsync(long chatId, DateTime date)
+    {
+        var buttons = new[]
+        {
+            this.CreateButtonForMainMenu(),
+        };
+        
+        await _client.SendTextMessageAsync(
+            chatId: chatId,
+            text: $"Нет рассписания на {date.Date.ToString("yyyy-M-d dddd")}",
+            replyMarkup: new InlineKeyboardMarkup(buttons));
+    }
+
+    public async Task ShowDayTimetableAsync(long chatId, DateTime date, StudyDay day)
+    {
+        var sb = new StringBuilder();
+        
+        sb.AppendLine($"🎓 `{date.Date.ToString("yyyy-M-d dddd")}`");
+        
+        if (day.SpecialDescription != null)
+        {
+            sb.AppendLine(day.SpecialDescription);
+        }
+        else
+        {
+            foreach (var lesson in day.Lessons)
+            {
+                sb.AppendLine($"🕑{lesson.StartsAt.ToString("hh\\:mm")} - {lesson.EndsAt.ToString("hh\\:mm")}");
+                sb.AppendLine(lesson.Title);
+                sb.AppendLine(lesson.Description);
+            }
+        }
+
+        var buttons = new[]
+        {
+            CreateButtonForMainMenu(),
+        };
+        
+        await _client.SendTextMessageAsync(
+            chatId: chatId,
+            text: sb.ToString(),
+            parseMode: ParseMode.Markdown,
+            replyMarkup: new InlineKeyboardMarkup(buttons));
+    }
+
     private InlineKeyboardButton CreateButtonForMainMenu()
     {
        return InlineKeyboardButton.WithCallbackData(

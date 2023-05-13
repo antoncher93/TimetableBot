@@ -38,6 +38,12 @@ public class CallbackDataEnvelope
     {
         MainMenu = mainMenu;
     }
+
+    public CallbackDataEnvelope(
+        TimetableTypeTap timetableTypeTap)
+    {
+        this.TimetableTypeTap = timetableTypeTap;
+    }
     
     [JsonProperty(PropertyName = "c")]
     public CourseTapCallbackData? CourseTap { get; set; }
@@ -53,11 +59,15 @@ public class CallbackDataEnvelope
     
     [JsonProperty(PropertyName = "m")]
     public MainMenuCallbackData? MainMenu { get; set; }
+    
+    [JsonProperty(PropertyName = "t")]
+    public TimetableTypeTap? TimetableTypeTap { get; set; }
 
     // метод для матчинг-паттерна
     public T Match<T>(
         Func<CourseTapCallbackData, T> onCourseTap,
         Func<GroupTapCallbackData, T> onGroupTap,
+        Func<TimetableTypeTap, T> onTimetableTypeTap,
         Func<WeekTapCallbackData, T> onWeekTap,
         Func<MainMenuCallbackData, T> onMainMenu)
     {
@@ -79,6 +89,11 @@ public class CallbackDataEnvelope
         if (this.MainMenu != null)
         {
             return onMainMenu(this.MainMenu);
+        }
+
+        if (this.TimetableTypeTap != null)
+        {
+            return onTimetableTypeTap(this.TimetableTypeTap);
         }
 
         throw new NotSupportedException();
