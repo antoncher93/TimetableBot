@@ -12,7 +12,7 @@ public static class ApplicationRoot
         ITelegramBotClient client,
         string yandexDiskFolder)
     {
-        var dataProvider = YandexCloudDataProvider.Create(
+        var dataProvider = DataProvider.Create(
             folder: yandexDiskFolder,
             excelFileReader: new ExcelFileReader());
 

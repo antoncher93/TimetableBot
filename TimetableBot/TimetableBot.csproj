@@ -16,7 +16,34 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\YandexCloudApiClient\YandexCloudApiClient.csproj" />
+      <Folder Include="Data" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Data\расписание на весенний семестр_2022-2023-1 курс.xls" />
+      <EmbeddedResource Include="Data\расписание на весенний семестр_2022-2023-1 курс.xls">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
+      <None Remove="Data\расписание на весенний семестр_2022-2023-2 курс.xls" />
+      <EmbeddedResource Include="Data\расписание на весенний семестр_2022-2023-2 курс.xls">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
+      <None Remove="Data\расписание на весенний семестр_2022-2023-3 курс.xls" />
+      <EmbeddedResource Include="Data\расписание на весенний семестр_2022-2023-3 курс.xls">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
+      <None Remove="Data\расписание на весенний семестр_2022-2023-4 курс.xls" />
+      <EmbeddedResource Include="Data\расписание на весенний семестр_2022-2023-4 курс.xls">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
+      <None Remove="Data\расписание на весенний семестр_2022-2023-5 курс, магистратура.xls" />
+      <EmbeddedResource Include="Data\расписание на весенний семестр_2022-2023-5 курс, магистратура.xls">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
+      <None Remove="Data\расписание на весенний семестр_2022-2023_очно-заочная форма обучения.xls" />
+      <EmbeddedResource Include="Data\расписание на весенний семестр_2022-2023_очно-заочная форма обучения.xls">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
     </ItemGroup>
 
 </Project>
