@@ -18,8 +18,7 @@ public class Program
                 botFacadeFactory: client =>
                 {
                     return ApplicationRoot.CreateBotFacade(
-                        client: client,
-                        yandexDiskFolder: "https://disk.yandex.ru/d/48bm4CYQw5OTBw");
+                        client: client);
                 })
             .GetAwaiter()
             .GetResult();

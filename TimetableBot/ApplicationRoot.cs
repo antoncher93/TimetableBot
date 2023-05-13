@@ -9,11 +9,9 @@ namespace TimetableBot;
 public static class ApplicationRoot
 {
     public static IBotFacade CreateBotFacade(
-        ITelegramBotClient client,
-        string yandexDiskFolder)
+        ITelegramBotClient client)
     {
         var dataProvider = DataProvider.Create(
-            folder: yandexDiskFolder,
             excelFileReader: new ExcelFileReader());
 
         var coursesRepository = new CoursesRepository(

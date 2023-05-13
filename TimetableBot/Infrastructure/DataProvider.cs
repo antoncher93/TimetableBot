@@ -5,23 +5,18 @@ namespace TimetableBot.Infrastructure;
 public class DataProvider : IDataProvider
 {
     private readonly IExcelFileReader _excelFileReader;
-    private readonly string _folder;
     private readonly List<Course> _courses = new();
 
     public DataProvider(
-        string folder,
         IExcelFileReader excelFileReader)
     {
-        _folder = folder;
         _excelFileReader = excelFileReader;
     }
 
     public static DataProvider Create(
-        string folder,
         IExcelFileReader excelFileReader)
     {
         var provider = new DataProvider(
-            folder: folder,
             excelFileReader: excelFileReader);
 
         provider
