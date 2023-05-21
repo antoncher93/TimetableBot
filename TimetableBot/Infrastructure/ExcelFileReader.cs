@@ -31,14 +31,14 @@ public class ExcelFileReader : IExcelFileReader
         var row = sheet.GetRow(6);
         var groupCount = CountGroups(sheet);
         
-        for (int i = 3; i < groupCount; i++)
+        for (int i = 3; i < 3 + groupCount; i++)
         {
             var cell = row.Cells[i];
             var week1 = ReadWeek(sheet, i);
             var week2 = ReadWeek(sheet, i + groupCount + 3);
             
             var group = new Group(
-                name: cell.ToString(),
+                name: cell.ToString()!.Replace("п", ""),
                 week1: week1,
                 week2: week2);
 
@@ -143,7 +143,9 @@ public class ExcelFileReader : IExcelFileReader
         {
             count += 2;
             var value = sheet.GetRow(dayRow + count).Cells[2].ToString();
-            stop = value == "1" || string.IsNullOrEmpty(value);
+            stop = value == "1" 
+                   || string.IsNullOrEmpty(value)
+                   || value == "пара";
         }
 
         return count;
