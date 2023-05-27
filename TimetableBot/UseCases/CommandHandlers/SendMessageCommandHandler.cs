@@ -16,7 +16,7 @@ public class SendMessageCommandHandler : SendMessageCommand.IHandler
 
     public async Task HandleAsync(SendMessageCommand command)
     {
-        var students = _studentRepository.GetAllStudents();
+        var students = await _studentRepository.GetAllStudentsAsync();
 
         foreach (var student in students)
         {

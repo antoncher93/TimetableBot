@@ -2,7 +2,7 @@
 
 public interface ITokensRepository
 {
-    void Add(string token);
-    bool Contains(string token);
-    void Remove(string token);
+    Task AddAsync(string token);
+    Task<bool> ContainsTokenAsync(string token);
+    Task RemoveTokenAsync(string token);
 }

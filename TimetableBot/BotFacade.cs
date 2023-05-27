@@ -22,7 +22,7 @@ public class BotFacade : IBotFacade
     private readonly ShowTimetableCommand.IHandler _showTimetableCommandHandler;
     private readonly SendMessageCommand.IHandler _sendMessageCommandHandler;
     private readonly AddAdminCommand.IHandler _addAdminCommandHandler;
-    private readonly JoinCommand.IHandler _joinCommandHandler;
+    private readonly JoinAdminCommand.IHandler _joinCommandHandler;
     private readonly ShowTimetableTypesCommand.IHandler _showTimetableTypesCommandHandler;
 
     public BotFacade(
@@ -35,7 +35,7 @@ public class BotFacade : IBotFacade
         ShowTimetableCommand.IHandler showTimetableCommandHandler,
         SendMessageCommand.IHandler sendMessageCommandHandler,
         AddAdminCommand.IHandler addAdminCommandHandler,
-        JoinCommand.IHandler joinCommandHandler,
+        JoinAdminCommand.IHandler joinCommandHandler,
         ShowTimetableTypesCommand.IHandler showTimetableTypesCommandHandler)
     {
         _coursesQuery = coursesQuery;
@@ -227,7 +227,7 @@ public class BotFacade : IBotFacade
 
             await _joinCommandHandler
                 .HandleAsync(
-                    command: new JoinCommand(
+                    adminCommand: new JoinAdminCommand(
                         student: student,
                         token: input[1]));
         }

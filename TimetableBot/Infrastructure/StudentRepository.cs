@@ -1,40 +1,68 @@
-﻿using TimetableBot.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using TimetableBot.Infrastructure.DataModels;
+using TimetableBot.Models;
 using TimetableBot.UseCases.Adapters;
 
 namespace TimetableBot.Infrastructure;
 
 public class StudentRepository : IStudentRepository
 {
-    private readonly IDictionary<string, Student> _students = new Dictionary<string, Student>();
-
-    public StudentRepository()
+    private readonly ApplicationDbContext _db;
+    public StudentRepository(ApplicationDbContext db)
     {
+        _db = db;
     }
 
-    public Student? FindStudent(long userId, long chatId)
+    public async Task<Student?> FindStudentAsync(long userId, long chatId)
     {
-        var exists = _students.TryGetValue(BuildKey(userId, chatId), out var value);
-        return exists ? value : null;
+        var model = await _db.Students.FirstOrDefaultAsync(
+            model => model.UserId == userId
+                     && model.ChatId == chatId);
+
+        return model != null
+            ? new Student(
+                userId: model.UserId,
+                chatId: chatId,
+                isAdmin: model.IsAdmin)
+            : null;
     }
 
-    public void AddStudent(Student student)
+    public async Task AddStudentAsync(Student student)
     {
-        var key = BuildKey(
-            userId: student.UserId,
-            chatId: student.ChatId);
+        var studentCount = await _db.Students.CountAsync();
 
-        student.IsAdmin = _students.Count == 0;
+        var entity = new StudentModel()
+        {
+            ChatId = student.ChatId,
+            UserId = student.UserId,
+            IsAdmin = studentCount == 0,
+        };
+
+        _db.Students.Add(entity);
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task<List<Student>> GetAllStudentsAsync()
+    {
+        var allEntities = await _db.Students
+            .ToListAsync();
+
+        return allEntities
+            .Select(entity => new Student(
+                userId: entity.UserId,
+                chatId: entity.ChatId,
+                isAdmin: entity.IsAdmin))
+            .ToList();
+    }
+
+    public async Task SaveStudentAsAdminAsync(Student student)
+    {
+        var entity = await _db.Students
+            .FirstOrDefaultAsync(model => model.UserId == student.UserId
+                                          && model.ChatId == student.ChatId);
+
+        entity.IsAdmin = true;
         
-        _students[key] = student;
-    }
-
-    public List<Student> GetAllStudents()
-    {
-        return _students.Values.ToList();
-    }
-
-    private string BuildKey(long userId, long chatId)
-    {
-        return $"{userId}:{chatId}";
+        await _db.SaveChangesAsync();
     }
 }

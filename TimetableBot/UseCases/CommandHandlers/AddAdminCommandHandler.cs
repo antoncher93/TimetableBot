@@ -21,7 +21,7 @@ public class AddAdminCommandHandler : AddAdminCommand.IHandler
     {
         var token = Guid.NewGuid().ToString();
         
-        _tokensRepository.Add(token);
+        await _tokensRepository.AddAsync(token);
         
         await _adapter.SendTokenAsync(
             chatId: command.ChatId,

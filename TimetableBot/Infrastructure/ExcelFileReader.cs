@@ -13,7 +13,7 @@ public class ExcelFileReader : IExcelFileReader
         using var stream = new MemoryStream(bytes);
 
         var workbook = new HSSFWorkbook(stream);
-        var sheet = workbook.GetSheetAt(0);
+        var sheet = this.SelectFirstActiveSheet(workbook);
         var name = Path.GetFileNameWithoutExtension(fileName); // берем имя файла без расширения
         var courseName = GetShortName(name);    // укорачиваем имя (берем все, что идет за последним `-` в строке
         var groups = ReadGroups(sheet);
@@ -23,6 +23,21 @@ public class ExcelFileReader : IExcelFileReader
             groups: groups);
 
         return Task.FromResult(course);
+    }
+
+    private ISheet SelectFirstActiveSheet(HSSFWorkbook workbook)
+    {
+        for (int i = 0; i < workbook.NumberOfSheets; i++)
+        {
+            var sheet = workbook.GetSheetAt(i);
+            
+            if (sheet.IsActive)
+            {
+                return sheet;
+            }
+        }
+
+        throw new IndexOutOfRangeException("В файле Execel отсутствует активный лист");
     }
 
     private List<Group> ReadGroups(ISheet sheet)
@@ -38,7 +53,7 @@ public class ExcelFileReader : IExcelFileReader
             var week2 = ReadWeek(sheet, i + groupCount + 3);
             
             var group = new Group(
-                name: cell.ToString()!.Replace("п", ""),
+                name: cell.ToString()!,
                 week1: week1,
                 week2: week2);
 

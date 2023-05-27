@@ -2,9 +2,9 @@
 
 namespace TimetableBot.UseCases.Commands;
 
-public class JoinCommand
+public class JoinAdminCommand
 {
-    public JoinCommand(Student student, string token)
+    public JoinAdminCommand(Student student, string token)
     {
         Student = student;
         Token = token;
@@ -12,7 +12,7 @@ public class JoinCommand
 
     public interface IHandler
     {
-        Task HandleAsync(JoinCommand command);
+        Task HandleAsync(JoinAdminCommand adminCommand);
     }
     
     public Student Student { get; }

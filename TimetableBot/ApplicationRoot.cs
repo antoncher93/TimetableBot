@@ -1,4 +1,5 @@
-﻿using Telegram.Bot;
+﻿using Microsoft.EntityFrameworkCore;
+using Telegram.Bot;
 using Telegram.Bot.Hosting;
 using TimetableBot.Infrastructure;
 using TimetableBot.UseCases.CommandHandlers;
@@ -9,7 +10,8 @@ namespace TimetableBot;
 public static class ApplicationRoot
 {
     public static IBotFacade CreateBotFacade(
-        ITelegramBotClient client)
+        ITelegramBotClient client,
+        string sqlConnectionString)
     {
         var dataProvider = DataProvider.Create(
             excelFileReader: new ExcelFileReader());
@@ -17,8 +19,12 @@ public static class ApplicationRoot
         var coursesRepository = new CoursesRepository(
             dataProvider: dataProvider);
 
+        var builder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        builder.UseSqlServer(connectionString: sqlConnectionString);
 
-        var studentRepository = new StudentRepository();
+        var db = new ApplicationDbContext(options: builder.Options);
+
+        var studentRepository = new StudentRepository(db);
 
         var coursesQuery = new CoursesQueryHandler(
             coursesRepository: coursesRepository);
@@ -51,15 +57,16 @@ public static class ApplicationRoot
             adapter: telegramBotClientAdapter,
             studentRepository: studentRepository);
 
-        var tokensRepository = new TokensRepository();
+        var tokensRepository = new TokensRepository(db);
 
         var addAdminCommandHandler = new AddAdminCommandHandler(
             adapter: telegramBotClientAdapter,
             tokensRepository: tokensRepository);
 
-        var joinCommandHandler = new JoinCommandHandler(
+        var joinCommandHandler = new JoinAdminCommandHandler(
             adapter: telegramBotClientAdapter,
-            tokensRepository: tokensRepository);
+            tokensRepository: tokensRepository,
+            studentRepository: studentRepository);
 
         var showTimetableTypesCommandHandler = new ShowTimetableTypesCommandHandler(
             adapter: telegramBotClientAdapter);

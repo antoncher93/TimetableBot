@@ -1,8 +1,9 @@
 ﻿namespace TimetableBot.Infrastructure.DataModels;
 
-public class StudentData
+public class StudentModel
 {
     public int Id { get; set; }
     public long UserId { get; set; }
     public long ChatId { get; set; }
+    public bool IsAdmin { get; set; }
 }

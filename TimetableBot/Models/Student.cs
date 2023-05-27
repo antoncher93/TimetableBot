@@ -2,16 +2,19 @@
 
 public class Student
 {
-    public Student(long userId, long chatId)
+    public Student(
+        long userId,
+        long chatId,
+        bool isAdmin)
     {
         UserId = userId;
         ChatId = chatId;
-        IsAdmin = false;
+        IsAdmin = isAdmin;
     }
     
     public long UserId { get; }
     
     public long ChatId { get; }
     
-    public bool IsAdmin { get; set; }
+    public bool IsAdmin { get; }
 }
