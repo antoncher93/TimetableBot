@@ -1,0 +1,12 @@
+version: '3.1'
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - 1433:1433
+    working_dir: /usr/src/app
+    command: sh -c '/opt/mssql/bin/sqlservr'
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: Pa23@!Ze7&
