@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections;
+using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -113,7 +114,11 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
                 replyMarkup: new InlineKeyboardMarkup(buttons));
     }
 
-    public async Task ShowTimetableAsync(long chatId, List<StudyDay> days, int course, int group)
+    public async Task ShowTimetableAsync(
+        long chatId,
+        List<StudyDay> days,
+        int course,
+        int group)
     {
         var sb = new StringBuilder();
 
@@ -242,11 +247,20 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
             replyMarkup: new InlineKeyboardMarkup(buttons));
     }
 
-    public async Task ShowNoTimetableForDayAsync(long chatId, DateTime date)
+    public async Task ShowNoTimetableForDayAsync(long chatId, DateTime date, int course, int group)
     {
-        var buttons = new[]
+        var backButton = InlineKeyboardButton.WithCallbackData(
+            text: "Назад",
+            callbackData: new CallbackDataEnvelope(
+                    groupTap: new GroupTapCallbackData(
+                        course: course,
+                        group: group))
+                .ToString());
+        
+        var buttons = new IEnumerable<InlineKeyboardButton>[]
         {
-            this.CreateButtonForMainMenu(),
+            new[] { backButton },
+            new [] { this.CreateButtonForMainMenu() },
         };
         
         await _client.SendTextMessageAsync(
@@ -255,7 +269,7 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
             replyMarkup: new InlineKeyboardMarkup(buttons));
     }
 
-    public async Task ShowDayTimetableAsync(long chatId, DateTime date, StudyDay day)
+    public async Task ShowDayTimetableAsync(long chatId, DateTime date, StudyDay day, int course, int group)
     {
         var sb = new StringBuilder();
         
@@ -275,9 +289,18 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
             }
         }
 
-        var buttons = new[]
+        var backButton = InlineKeyboardButton.WithCallbackData(
+            text: "Назад",
+            callbackData: new CallbackDataEnvelope(
+                groupTap: new GroupTapCallbackData(
+                    course: course,
+                    group: group))
+                .ToString());
+
+        var buttons = new IEnumerable<InlineKeyboardButton>[]
         {
-            CreateButtonForMainMenu(),
+            new[] { backButton },
+            new []{ CreateButtonForMainMenu() },
         };
         
         await _client.SendTextMessageAsync(

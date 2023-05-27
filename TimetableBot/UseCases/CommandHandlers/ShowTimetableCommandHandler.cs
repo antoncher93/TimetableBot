@@ -86,14 +86,15 @@ public class ShowTimetableCommandHandler : ShowTimetableCommand.IHandler
         {
             return _adapter.ShowNoTimetableForDayAsync(
                 chatId: chatId,
-                date: date);
+                date: date, 
+                course: course, group: group);
         }
         else
         {
             return _adapter.ShowDayTimetableAsync(
                 chatId: chatId,
                 date: date,
-                studyDay: studyDay);
+                studyDay: studyDay, course: course, group: group);
         }
     }
 
