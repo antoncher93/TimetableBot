@@ -14,7 +14,7 @@ public class Program
         BotHost.StartAsync(
                 port: 10000,
                 telegramBotToken: "5692929074:AAEiBfoSy4CndyOU5kx3XZNpNQ3sPlbyAPc",
-                webhookHost: "https://4237-94-243-173-139.ngrok-free.app",
+                webhookHost: "https://fa95-94-243-172-103.ngrok-free.app",
                 botFacadeFactory: client =>
                 {
                     return ApplicationRoot.CreateBotFacade(

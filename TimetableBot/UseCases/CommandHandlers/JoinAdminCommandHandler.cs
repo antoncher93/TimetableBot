@@ -31,7 +31,9 @@ public class JoinAdminCommandHandler : JoinAdminCommand.IHandler
 
             await _adapter.SendAdminJoinedAsync(adminCommand.Student);
         }
-
-        await _adapter.SendCannotJoinAsAdminAsync(adminCommand.Student);
+        else
+        {
+            await _adapter.SendCannotJoinAsAdminAsync(adminCommand.Student);
+        }
     }
 }
