@@ -310,6 +310,14 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
             replyMarkup: new InlineKeyboardMarkup(buttons));
     }
 
+    public Task SendAdminHasBeenDeletedAsync(
+        long chatId)
+    {
+        return _client.SendTextMessageAsync(
+            chatId: chatId,
+            text: "Скретный ключ был удален. Связанный с ним пользователь потерял права администратора.");
+    }
+
     private InlineKeyboardButton CreateButtonForMainMenu()
     {
        return InlineKeyboardButton.WithCallbackData(

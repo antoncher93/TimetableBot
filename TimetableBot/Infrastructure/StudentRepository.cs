@@ -22,20 +22,16 @@ public class StudentRepository : IStudentRepository
         return model != null
             ? new Student(
                 userId: model.UserId,
-                chatId: chatId,
-                isAdmin: model.IsAdmin)
+                chatId: chatId)
             : null;
     }
 
     public async Task AddStudentAsync(Student student)
     {
-        var studentCount = await _db.Students.CountAsync();
-
         var entity = new StudentModel()
         {
             ChatId = student.ChatId,
             UserId = student.UserId,
-            IsAdmin = studentCount == 0,
         };
 
         _db.Students.Add(entity);
@@ -50,19 +46,7 @@ public class StudentRepository : IStudentRepository
         return allEntities
             .Select(entity => new Student(
                 userId: entity.UserId,
-                chatId: entity.ChatId,
-                isAdmin: entity.IsAdmin))
+                chatId: entity.ChatId))
             .ToList();
-    }
-
-    public async Task SaveStudentAsAdminAsync(Student student)
-    {
-        var entity = await _db.Students
-            .FirstOrDefaultAsync(model => model.UserId == student.UserId
-                                          && model.ChatId == student.ChatId);
-
-        entity.IsAdmin = true;
-        
-        await _db.SaveChangesAsync();
     }
 }

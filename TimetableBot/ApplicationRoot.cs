@@ -3,6 +3,7 @@ using Telegram.Bot;
 using Telegram.Bot.Hosting;
 using TimetableBot.Infrastructure;
 using TimetableBot.UseCases.CommandHandlers;
+using TimetableBot.UseCases.Queries;
 using TimetableBot.UseCases.QueryHandlers;
 
 namespace TimetableBot;
@@ -25,12 +26,15 @@ public static class ApplicationRoot
         var db = new ApplicationDbContext(options: builder.Options);
 
         var studentRepository = new StudentRepository(db);
+        
+        var adminRepository = new AdminRepository(db);
 
         var coursesQuery = new CoursesQueryHandler(
             coursesRepository: coursesRepository);
 
         var registerStudentQueryHandler = new RegisterStudentQueryHandler(
-            studentRepository: studentRepository);
+            studentRepository: studentRepository,
+            adminRepository: adminRepository);
 
         var telegramBotClientAdapter = new TelegramBotClientAdapter(client);
 
@@ -57,22 +61,27 @@ public static class ApplicationRoot
             adapter: telegramBotClientAdapter,
             studentRepository: studentRepository);
 
-        var tokensRepository = new TokensRepository(db);
-
         var addAdminCommandHandler = new AddAdminCommandHandler(
             adapter: telegramBotClientAdapter,
-            tokensRepository: tokensRepository);
+            adminRepository: adminRepository);
 
         var joinCommandHandler = new JoinAdminCommandHandler(
             adapter: telegramBotClientAdapter,
-            tokensRepository: tokensRepository,
-            studentRepository: studentRepository);
+            adminRepository: adminRepository);
 
         var showTimetableTypesCommandHandler = new ShowTimetableTypesCommandHandler(
             adapter: telegramBotClientAdapter);
+
+        var isUserAdminQueryHandler = new IsUserAdminQueryHandler(
+            adminRepository: adminRepository);
+
+        var deleteAdminCommandHandler = new DeleteAdminCommandHandler(
+            clientAdapter: telegramBotClientAdapter,
+            adminRepository: adminRepository);
         
         return new BotFacade(
             coursesQuery: coursesQuery,
+            isUserAdminQueryHandler: isUserAdminQueryHandler,
             groupsQueryHandler: groupsQueryHandler,
             registerStudentQueryHandler: registerStudentQueryHandler,
             showCoursesCommandHandler: showCoursesCommandHandler,
@@ -82,6 +91,7 @@ public static class ApplicationRoot
             sendMessageCommandHandler: sendMessageCommandHandler,
             addAdminCommandHandler: addAdminCommandHandler,
             joinCommandHandler: joinCommandHandler,
-            showTimetableTypesCommandHandler: showTimetableTypesCommandHandler);
+            showTimetableTypesCommandHandler: showTimetableTypesCommandHandler,
+            deleteAdminCommandHandler: deleteAdminCommandHandler);
     }
 }

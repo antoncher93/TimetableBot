@@ -9,6 +9,4 @@ public interface IStudentRepository
     Task AddStudentAsync(Student student);
     
     Task<List<Student>> GetAllStudentsAsync();
-    
-    Task SaveStudentAsAdminAsync(Student student);
 }

@@ -9,7 +9,8 @@ public class ApplicationDbContext : DbContext
     {
         this.Database.EnsureCreated();
     }
+    
     public DbSet<StudentModel> Students { get; set; }
     
-    public DbSet<Token> Tokens { get; set; }
+    public DbSet<Admin> Admins { get; set; }
 }

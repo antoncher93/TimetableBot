@@ -7,27 +7,24 @@ namespace TimetableBot.UseCases.CommandHandlers;
 public class JoinAdminCommandHandler : JoinAdminCommand.IHandler
 {
     private readonly ITelegramBotClientAdapter _adapter;
-    private readonly ITokensRepository _tokensRepository;
-    private readonly IStudentRepository _studentRepository;
+    private readonly IAdminRepository _adminRepository;
 
     public JoinAdminCommandHandler(
         ITelegramBotClientAdapter adapter,
-        ITokensRepository tokensRepository,
-        IStudentRepository studentRepository)
+        IAdminRepository adminRepository)
     {
         _adapter = adapter;
-        _tokensRepository = tokensRepository;
-        _studentRepository = studentRepository;
+        _adminRepository = adminRepository;
     }
     public async Task HandleAsync(JoinAdminCommand adminCommand)
     {
-        var tokenExists = await _tokensRepository.ContainsTokenAsync(adminCommand.Token);
+        var tokenExists = await _adminRepository.ContainsFreeTokenAsync(adminCommand.Token);
         
         if (tokenExists)
         {
-            await _tokensRepository.RemoveTokenAsync(adminCommand.Token);
-
-            await _studentRepository.SaveStudentAsAdminAsync(adminCommand.Student);
+            await _adminRepository.UpsertAdminAsync(
+                token: adminCommand.Token,
+                userId: adminCommand.Student.UserId);
 
             await _adapter.SendAdminJoinedAsync(adminCommand.Student);
         }

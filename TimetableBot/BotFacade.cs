@@ -14,6 +14,8 @@ namespace TimetableBot;
 public class BotFacade : IBotFacade
 {
     private readonly RegisterStudentQuery.IHandler _registerStudentQueryHandler;
+    private readonly IsUserAdminQuery.IHandler _isUserAdminQueryHandler;
+    private readonly DeleteAdminCommand.IHandler _deleteAdminCommandHandler;
     private readonly ICoursesQuery _coursesQuery;
     private readonly GroupsQuery.IHandler _groupsQueryHandler;
     private readonly ShowCoursesCommand.IHandler _showCoursesCommandHandler;
@@ -36,7 +38,9 @@ public class BotFacade : IBotFacade
         SendMessageCommand.IHandler sendMessageCommandHandler,
         AddAdminCommand.IHandler addAdminCommandHandler,
         JoinAdminCommand.IHandler joinCommandHandler,
-        ShowTimetableTypesCommand.IHandler showTimetableTypesCommandHandler)
+        ShowTimetableTypesCommand.IHandler showTimetableTypesCommandHandler,
+        IsUserAdminQuery.IHandler isUserAdminQueryHandler,
+        DeleteAdminCommand.IHandler deleteAdminCommandHandler)
     {
         _coursesQuery = coursesQuery;
         _registerStudentQueryHandler = registerStudentQueryHandler;
@@ -49,6 +53,8 @@ public class BotFacade : IBotFacade
         _addAdminCommandHandler = addAdminCommandHandler;
         _joinCommandHandler = joinCommandHandler;
         _showTimetableTypesCommandHandler = showTimetableTypesCommandHandler;
+        _isUserAdminQueryHandler = isUserAdminQueryHandler;
+        _deleteAdminCommandHandler = deleteAdminCommandHandler;
     }
 
     public Task OnUpdateAsync(Update update)
@@ -201,15 +207,48 @@ public class BotFacade : IBotFacade
                 userId: message.From!.Id,
                 chatId: message.Chat.Id);
         }
-        else if(message.Text.StartsWith("/join "))
+        else if(message.Text!.StartsWith("/join "))
         {
             return this.OnJoinAdminAsync(
                 userId: message.From!.Id,
                 chatId: message.Chat.Id,
                 text: message.Text);
         }
+        else if(message.Text!.StartsWith("/deladmin "))
+        {
+            return this.OnDeleteAdminAsync(
+                userId: message.From!.Id,
+                chatId: message.Chat.Id,
+                text: message.Text);
+        }
 
         return Task.CompletedTask;
+    }
+
+    private async Task OnDeleteAdminAsync(
+        long userId,
+        long chatId,
+        string text)
+    {
+        var isUserAdmin = await _isUserAdminQueryHandler
+            .HandleAsync(
+                query: new IsUserAdminQuery(userId));
+        
+        if (isUserAdmin)
+        {
+            var args = text.Split(' ');
+
+            if (args.Length >= 2)
+            {
+                var secretKey = args[1];
+
+                await _deleteAdminCommandHandler
+                    .HandleAsync(
+                        command: new DeleteAdminCommand(
+                            chatId: chatId,
+                            token: secretKey));
+            }
+        }
     }
 
     private async Task OnJoinAdminAsync(
@@ -235,18 +274,17 @@ public class BotFacade : IBotFacade
 
     private async Task OnAddAdminAsync(long userId, long chatId)
     {
-        // регистрируем студента
-        var student = await RegisterStudentAsync(userId, chatId);
-
-        if (!student.IsAdmin) // проверяем, что студент админ
-        {
-            return;
-        }
-
-        await _addAdminCommandHandler
+        var isUserAdmin = await _isUserAdminQueryHandler
             .HandleAsync(
-                command: new AddAdminCommand(
-                    chatId: chatId));
+                query: new IsUserAdminQuery(userId));
+
+        if (isUserAdmin) // проверяем, что студент админ
+        {
+            await _addAdminCommandHandler
+                .HandleAsync(
+                    command: new AddAdminCommand(
+                        chatId: chatId));
+        }
     }
 
     private async Task OnSendMessageBotCommand(
@@ -254,20 +292,19 @@ public class BotFacade : IBotFacade
         long chatId,
         int replyToMessageId)
     {
-        // регистрируем студента
-        var student = await RegisterStudentAsync(userId, chatId);
-
-        if (!student.IsAdmin) // проверяем, что студент админ
-        {
-            return;
-        }
-        
-        // вызываем команду отвправки сообщения всем
-        await _sendMessageCommandHandler
+        var isUserAdmin = await _isUserAdminQueryHandler
             .HandleAsync(
-                command: new SendMessageCommand(
-                    messageId: replyToMessageId,
-                    fromChatId: chatId));
+                query: new IsUserAdminQuery(userId));
+
+        if (isUserAdmin)
+        {
+            // вызываем команду отвправки сообщения всем
+            await _sendMessageCommandHandler
+                .HandleAsync(
+                    command: new SendMessageCommand(
+                        messageId: replyToMessageId,
+                        fromChatId: chatId));
+        }
     }
 
     private async Task OnStartBotCommandAsync(

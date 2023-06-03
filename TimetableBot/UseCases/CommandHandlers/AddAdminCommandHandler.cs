@@ -7,21 +7,21 @@ namespace TimetableBot.UseCases.CommandHandlers;
 public class AddAdminCommandHandler : AddAdminCommand.IHandler
 {
     private readonly ITelegramBotClientAdapter _adapter;
-    private readonly ITokensRepository _tokensRepository;
+    private readonly IAdminRepository _adminRepository;
 
     public AddAdminCommandHandler(
         ITelegramBotClientAdapter adapter,
-        ITokensRepository tokensRepository)
+        IAdminRepository adminRepository)
     {
         _adapter = adapter;
-        _tokensRepository = tokensRepository;
+        _adminRepository = adminRepository;
     }
 
     public async Task HandleAsync(AddAdminCommand command)
     {
         var token = Guid.NewGuid().ToString();
         
-        await _tokensRepository.AddAsync(token);
+        await _adminRepository.AddAsync(token);
         
         await _adapter.SendTokenAsync(
             chatId: command.ChatId,

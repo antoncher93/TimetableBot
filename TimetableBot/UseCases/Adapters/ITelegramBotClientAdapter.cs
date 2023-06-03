@@ -44,10 +44,18 @@ public interface ITelegramBotClientAdapter
         int course,
         int group);
 
-    Task ShowNoTimetableForDayAsync(long chatId,
-        DateTime date, int course, int group);
-
-    Task ShowDayTimetableAsync(long chatId,
+    Task ShowNoTimetableForDayAsync(
+        long chatId,
         DateTime date,
-        StudyDay studyDay, int course, int group);
+        int course,
+        int group);
+
+    Task ShowDayTimetableAsync(
+        long chatId,
+        DateTime date,
+        StudyDay studyDay,
+        int course,
+        int group);
+
+    Task SendAdminHasBeenDeletedAsync(long chatId);
 }
