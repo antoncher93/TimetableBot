@@ -41,9 +41,11 @@ public static class ApplicationRoot
         var showCoursesCommandHandler = new ShowCoursesCommandHandler(
             adapter: telegramBotClientAdapter);
 
+        var groupsRepository = new GroupsRepository(
+            dataProvider: dataProvider);
+
         var groupsQueryHandler = new GroupsQueryHandler(
-            groupsRepository: new GroupsRepository(
-                dataProvider: dataProvider));
+            groupsRepository: groupsRepository);
 
         var showGroupsCommandHandler = new ShowGroupsCommandHandler(
             adapter: telegramBotClientAdapter);
@@ -59,7 +61,9 @@ public static class ApplicationRoot
 
         var sendMessageCommandHandler = new SendMessageCommandHandler(
             adapter: telegramBotClientAdapter,
-            studentRepository: studentRepository);
+            studentRepository: studentRepository,
+            coursesRepository: coursesRepository,
+            groupsRepository: groupsRepository);
 
         var addAdminCommandHandler = new AddAdminCommandHandler(
             adapter: telegramBotClientAdapter,
@@ -78,6 +82,10 @@ public static class ApplicationRoot
         var deleteAdminCommandHandler = new DeleteAdminCommandHandler(
             clientAdapter: telegramBotClientAdapter,
             adminRepository: adminRepository);
+
+        var setStudentGroupCommandHandler = new SetStudentGroupCommandHandler(
+            studentRepository: studentRepository,
+            groupsRepository: groupsRepository);
         
         return new BotFacade(
             coursesQuery: coursesQuery,
@@ -92,6 +100,7 @@ public static class ApplicationRoot
             addAdminCommandHandler: addAdminCommandHandler,
             joinCommandHandler: joinCommandHandler,
             showTimetableTypesCommandHandler: showTimetableTypesCommandHandler,
-            deleteAdminCommandHandler: deleteAdminCommandHandler);
+            deleteAdminCommandHandler: deleteAdminCommandHandler,
+            setStudentGroupCommandHandler: setStudentGroupCommandHandler);
     }
 }

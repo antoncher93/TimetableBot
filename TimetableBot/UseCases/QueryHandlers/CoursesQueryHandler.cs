@@ -15,6 +15,7 @@ public class CoursesQueryHandler : ICoursesQuery
 
     public Task<List<string>> GetCoursesAsync()
     {
-        return _coursesRepository.GetCoursesAsync();
+        var result = _coursesRepository.GetCourses();
+        return Task.FromResult(result);
     }
 }

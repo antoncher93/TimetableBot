@@ -58,4 +58,8 @@ public interface ITelegramBotClientAdapter
         int group);
 
     Task SendAdminHasBeenDeletedAsync(long chatId);
+    
+    Task NotifyMessageWasSentAsync(long chatId);
+    
+    Task SendGroupDoesNotExistsAsync(long chatId, string groupName);
 }

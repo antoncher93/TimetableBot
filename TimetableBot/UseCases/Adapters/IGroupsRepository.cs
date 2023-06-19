@@ -4,5 +4,5 @@ namespace TimetableBot.UseCases.Adapters;
 
 public interface IGroupsRepository
 {
-    Task<List<Group>> GetGroupsAsync(int course);
+    List<Group> GetGroups(int course);
 }

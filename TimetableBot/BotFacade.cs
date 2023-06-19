@@ -5,7 +5,6 @@ using Telegram.Bot.Types.Enums;
 using TimetableBot.CallbackQueries;
 using TimetableBot.Models;
 using TimetableBot.UseCases;
-using TimetableBot.UseCases.CommandHandlers;
 using TimetableBot.UseCases.Commands;
 using TimetableBot.UseCases.Queries;
 
@@ -26,6 +25,7 @@ public class BotFacade : IBotFacade
     private readonly AddAdminCommand.IHandler _addAdminCommandHandler;
     private readonly JoinAdminCommand.IHandler _joinCommandHandler;
     private readonly ShowTimetableTypesCommand.IHandler _showTimetableTypesCommandHandler;
+    private readonly SetStudentGroupCommand.IHandler _setStudentGroupCommandHandler;
 
     public BotFacade(
         ICoursesQuery coursesQuery,
@@ -40,7 +40,8 @@ public class BotFacade : IBotFacade
         JoinAdminCommand.IHandler joinCommandHandler,
         ShowTimetableTypesCommand.IHandler showTimetableTypesCommandHandler,
         IsUserAdminQuery.IHandler isUserAdminQueryHandler,
-        DeleteAdminCommand.IHandler deleteAdminCommandHandler)
+        DeleteAdminCommand.IHandler deleteAdminCommandHandler,
+        SetStudentGroupCommand.IHandler setStudentGroupCommandHandler)
     {
         _coursesQuery = coursesQuery;
         _registerStudentQueryHandler = registerStudentQueryHandler;
@@ -55,6 +56,7 @@ public class BotFacade : IBotFacade
         _showTimetableTypesCommandHandler = showTimetableTypesCommandHandler;
         _isUserAdminQueryHandler = isUserAdminQueryHandler;
         _deleteAdminCommandHandler = deleteAdminCommandHandler;
+        _setStudentGroupCommandHandler = setStudentGroupCommandHandler;
     }
 
     public Task OnUpdateAsync(Update update)
@@ -151,11 +153,18 @@ public class BotFacade : IBotFacade
                     week: weekTap.Week));
     }
 
-    private Task OnGroupTapAsync(
+    private async Task OnGroupTapAsync(
         Student student,
         GroupTapCallbackData groupTap)
     {
-        return _showTimetableTypesCommandHandler
+        await _setStudentGroupCommandHandler
+            .HandleAsync(
+                command: new SetStudentGroupCommand(
+                    student: student,
+                    courseIndex: groupTap.Course,
+                    groupIndex: groupTap.Group));
+        
+        await _showTimetableTypesCommandHandler
             .HandleAsync(
                 command: new ShowTimetableTypesCommand(
                     chatId: student.ChatId,
@@ -189,7 +198,7 @@ public class BotFacade : IBotFacade
                 userId: message.From!.Id,
                 chatId: message.Chat.Id);
         }
-        else if (message.Text == "/send")
+        else if (message.Text.StartsWith("/send"))
         {
             // получили команду /send
 
@@ -198,7 +207,8 @@ public class BotFacade : IBotFacade
                 return this.OnSendMessageBotCommand(
                     userId: message.From!.Id,
                     chatId: message.Chat.Id,
-                    replyToMessageId: message.ReplyToMessage!.MessageId);
+                    replyToMessageId: message.ReplyToMessage!.MessageId,
+                    messageText: message.Text);
             }
         }
         else if (message.Text == "/addadmin")
@@ -287,23 +297,30 @@ public class BotFacade : IBotFacade
         }
     }
 
-    private async Task OnSendMessageBotCommand(
-        long userId,
+    private async Task OnSendMessageBotCommand(long userId,
         long chatId,
-        int replyToMessageId)
+        int replyToMessageId, string messageText)
     {
+        
         var isUserAdmin = await _isUserAdminQueryHandler
             .HandleAsync(
                 query: new IsUserAdminQuery(userId));
 
         if (isUserAdmin)
         {
+            var args = messageText.Split(' ');
+
+            var groupName = args.Length > 1
+                ? args[1]
+                : null;
+            
             // вызываем команду отвправки сообщения всем
             await _sendMessageCommandHandler
                 .HandleAsync(
                     command: new SendMessageCommand(
                         messageId: replyToMessageId,
-                        fromChatId: chatId));
+                        fromChatId: chatId,
+                        groupName: groupName));
         }
     }
 

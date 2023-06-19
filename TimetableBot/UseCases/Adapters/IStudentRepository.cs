@@ -8,5 +8,7 @@ public interface IStudentRepository
 
     Task AddStudentAsync(Student student);
     
-    Task<List<Student>> GetAllStudentsAsync();
+    Task<List<Student>> GetAllStudentsAsync(string? groupName);
+
+    Task SaveStudentGroupAsync(Student student, Group group);
 }

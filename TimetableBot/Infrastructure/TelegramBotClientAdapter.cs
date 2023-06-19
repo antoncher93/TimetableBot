@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Text;
+﻿using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -316,6 +315,20 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
         return _client.SendTextMessageAsync(
             chatId: chatId,
             text: "Скретный ключ был удален. Связанный с ним пользователь потерял права администратора.");
+    }
+
+    public Task NotifyMessageWasSentAsync(long chatId)
+    {
+        return _client.SendTextMessageAsync(
+            chatId: chatId,
+            text: "Сообщение было отправлено");
+    }
+
+    public Task SendGroupDoesNotExistsAsync(long chatId, string groupName)
+    {
+        return _client.SendTextMessageAsync(
+            chatId: chatId,
+            text: $"Не удалось найти группу {groupName}");
     }
 
     private InlineKeyboardButton CreateButtonForMainMenu()

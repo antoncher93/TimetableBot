@@ -38,15 +38,49 @@ public class StudentRepository : IStudentRepository
         await _db.SaveChangesAsync();
     }
 
-    public async Task<List<Student>> GetAllStudentsAsync()
+    public async Task<List<Student>> GetAllStudentsAsync(
+        string? groupName = default)
     {
-        var allEntities = await _db.Students
-            .ToListAsync();
+        IQueryable<StudentModel> query = _db.Students
+            .Include(student => student.Group);
 
-        return allEntities
+        if (groupName != null)
+        {
+            query = query.Where(student => student.Group != null && student.Group.Name == groupName);
+        }
+            
+        var students = await query.ToListAsync();
+
+        return students
             .Select(entity => new Student(
                 userId: entity.UserId,
                 chatId: entity.ChatId))
             .ToList();
+    }
+
+    public async Task SaveStudentGroupAsync(Student student, Group group)
+    {
+        var groupModel = await _db.Groups.FirstOrDefaultAsync(g => g.Name == group.Name);
+
+        if (groupModel is null)
+        {
+            groupModel = new GroupModel(
+                name: group.Name);
+
+            _db.Groups.Add(groupModel);
+            await _db.SaveChangesAsync();
+        }
+
+        var studentModel = await _db.Students
+            .FirstOrDefaultAsync(s
+                => s.UserId == student.UserId
+                   && s.ChatId == student.ChatId);
+
+        if (studentModel != null)
+        {
+            studentModel.GroupId = groupModel.Id;
+
+            await _db.SaveChangesAsync();
+        }
     }
 }

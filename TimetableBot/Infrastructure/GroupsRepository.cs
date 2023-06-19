@@ -12,10 +12,9 @@ public class GroupsRepository : IGroupsRepository
         _dataProvider = dataProvider;
     }
 
-    public Task<List<Group>> GetGroupsAsync(int course)
+    public List<Group> GetGroups(int course)
     {
         var courseObj = _dataProvider.GetCourses()[course];
-
-        return Task.FromResult(courseObj.Groups.ToList());
+        return courseObj.Groups.ToList();
     }
 }

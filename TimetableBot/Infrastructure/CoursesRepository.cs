@@ -11,12 +11,10 @@ public class CoursesRepository : ICoursesRepository
         _dataProvider = dataProvider;
     }
 
-    public Task<List<string>> GetCoursesAsync()
+    public List<string> GetCourses()
     {
-        var result = _dataProvider.GetCourses()
+        return _dataProvider.GetCourses()
             .Select(course => course.Name)
             .ToList();
-
-        return Task.FromResult(result);
     }
 }

@@ -14,6 +14,7 @@ public class GroupsQueryHandler : GroupsQuery.IHandler
 
     public Task<List<Group>> HandleAsync(GroupsQuery query)
     {
-        return _groupsRepository.GetGroupsAsync(query.Course);
+        var result =  _groupsRepository.GetGroups(query.Course);
+        return Task.FromResult(result);
     }
 }
