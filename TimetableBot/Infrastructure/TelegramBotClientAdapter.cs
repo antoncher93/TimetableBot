@@ -168,7 +168,7 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
         int messageId,
         long chatId)
     {
-        return _client.CopyMessageAsync(
+        return _client.ForwardMessageAsync(
             chatId: chatId,
             messageId: messageId,
             fromChatId: fromChatId);
