@@ -267,6 +267,28 @@ public class TelegramBotClientAdapter : ITelegramBotClientAdapter
             text: $"Нет рассписания на {date.Date.ToString("yyyy-M-d dddd")}",
             replyMarkup: new InlineKeyboardMarkup(buttons));
     }
+    
+    public async Task ShowNoTimetableAsync(long chatId, int course, int group)
+    {
+        var backButton = InlineKeyboardButton.WithCallbackData(
+            text: "Назад",
+            callbackData: new CallbackDataEnvelope(
+                    groupTap: new GroupTapCallbackData(
+                        course: course,
+                        group: group))
+                .ToString());
+        
+        var buttons = new IEnumerable<InlineKeyboardButton>[]
+        {
+            new[] { backButton },
+            new [] { this.CreateButtonForMainMenu() },
+        };
+        
+        await _client.SendTextMessageAsync(
+            chatId: chatId,
+            text: $"В настоящий момент занятий нет",
+            replyMarkup: new InlineKeyboardMarkup(buttons));
+    }
 
     public async Task ShowDayTimetableAsync(long chatId, DateTime date, StudyDay day, int course, int group)
     {

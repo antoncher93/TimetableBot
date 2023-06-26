@@ -31,6 +31,13 @@ public class ShowTimetableCommandHandler : ShowTimetableCommand.IHandler
 
     private Task ShowTodayTimetableAsync(ShowTimetableCommand command)
     {
+        if (IsHoliday(DateTime.Today))
+        {
+            return _adapter.ShowNoTimetableAsync(
+                chatId: command.ChatId,
+                course: command.Course,
+                group: command.Group);
+        }
         return ShowTimetableAsync(
             date: DateTime.Today, 
             course: command.Course,
@@ -40,6 +47,16 @@ public class ShowTimetableCommandHandler : ShowTimetableCommand.IHandler
 
     private Task ShowWeekTimeTableAsync(ShowTimetableCommand command)
     {
+        var today = DateTime.Today;
+
+        if (IsHoliday(today))
+        {
+            return _adapter.ShowNoTimetableAsync(
+                chatId: command.ChatId,
+                course: command.Course,
+                group: command.Group);
+        }
+        
         var days = _studyDaysRepository
             .GetDays(
                 course: command.Course,
@@ -56,6 +73,14 @@ public class ShowTimetableCommandHandler : ShowTimetableCommand.IHandler
     private Task ShowTomorrowTimeTableAsync(ShowTimetableCommand command)
     {
         var tomorrow = DateTime.Today.AddDays(1);
+
+        if (IsHoliday(tomorrow))
+        {
+            return _adapter.ShowNoTimetableAsync(
+                chatId: command.ChatId,
+                group: command.Group,
+                course: command.Course);
+        }
 
         return ShowTimetableAsync(
             date: tomorrow,
@@ -131,5 +156,11 @@ public class ShowTimetableCommandHandler : ShowTimetableCommand.IHandler
             DayOfWeek.Sunday => "воскресенье",
             _ => throw new ArgumentOutOfRangeException()
         };
+    }
+
+    private bool IsHoliday(DateTime dateTime)
+    {
+        return dateTime.Month >= 6
+               && dateTime.Month <= 9;
     }
 }

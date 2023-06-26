@@ -49,6 +49,11 @@ public interface ITelegramBotClientAdapter
         DateTime date,
         int course,
         int group);
+    
+    Task ShowNoTimetableAsync(
+        long chatId,
+        int course,
+        int group);
 
     Task ShowDayTimetableAsync(
         long chatId,
